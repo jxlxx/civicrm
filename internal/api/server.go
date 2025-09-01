@@ -175,7 +175,10 @@ func (s *ServerImpl) ApiInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(info)
+	if err := json.NewEncoder(w).Encode(info); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // ListExtensions returns list of loaded extensions
@@ -184,7 +187,10 @@ func (s *ServerImpl) ListExtensions(w http.ResponseWriter, r *http.Request) {
 	extensions := []Extension{}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(extensions)
+	if err := json.NewEncoder(w).Encode(extensions); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // HealthCheck returns health status
@@ -202,7 +208,10 @@ func (s *ServerImpl) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(health)
+	if err := json.NewEncoder(w).Encode(health); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // EntityDelete handles entity deletion
@@ -216,7 +225,10 @@ func (s *ServerImpl) EntityDelete(w http.ResponseWriter, r *http.Request, entity
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // EntityGet handles entity retrieval
@@ -230,7 +242,10 @@ func (s *ServerImpl) EntityGet(w http.ResponseWriter, r *http.Request, entity st
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // EntityCreate handles entity creation
@@ -244,7 +259,10 @@ func (s *ServerImpl) EntityCreate(w http.ResponseWriter, r *http.Request, entity
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // EntityUpdate handles entity updates
@@ -258,7 +276,10 @@ func (s *ServerImpl) EntityUpdate(w http.ResponseWriter, r *http.Request, entity
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Helper function for creating pointers to any type
