@@ -16,6 +16,8 @@ help:
 	@echo "  migrate-new - Create new migration file"
 	@echo "  migrate-rollback - Rollback to specific version"
 	@echo "  migrate-status - Show migration status"
+	@echo "  migrate-test - Run test database migrations"
+	@echo "  migrate-test-status - Show test migration status"
 	@echo "  install-tern - Install Tern migration tool"
 	@echo "  up        - Start development services (PostgreSQL, Redis)"
 	@echo "  down      - Stop development services"
@@ -91,6 +93,16 @@ migrate-status:
 	export PGPASSWORD=civicrm_dev_password; \
 	export PGSSLMODE=disable; \
 	tern migrate -c tern.conf --migrations migrations --destination 0 || true
+
+# Run test database migrations
+migrate-test:
+	@echo "Running test database migrations..."
+	PGHOST=localhost PGPORT=5433 PGDATABASE=civicrm_test PGUSER=civicrm PGPASSWORD=testpass PGSSLMODE=disable tern migrate -c tern.conf --migrations migrations
+
+# Show test migration status
+migrate-test-status:
+	@echo "Test migration status:"
+	@PGHOST=localhost PGPORT=5433 PGDATABASE=civicrm_test PGUSER=civicrm PGPASSWORD=testpass PGSSLMODE=disable tern migrate -c tern.conf --migrations migrations --destination 0 || true
 
 # Build the application
 build:
