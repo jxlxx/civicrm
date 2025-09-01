@@ -104,3 +104,54 @@ func TestNewQueries(t *testing.T) {
 	// querier := db.New(db)
 	// require.NotNil(t, querier)
 }
+
+// TestActivitiesTable tests the activities table generated code
+func TestActivitiesTable(t *testing.T) {
+	// Test that we can create an activity instance
+	activity := db.Activity{
+		ID:                uuid.New(),
+		ActivityTypeID:    uuid.New(),
+		Subject:           sql.NullString{String: "Follow-up Call", Valid: true},
+		ActivityDateTime:  time.Now(),
+		Duration:          sql.NullInt32{Int32: 30, Valid: true},
+		Location:          sql.NullString{String: "Office", Valid: true},
+		Details:           sql.NullString{String: "Discuss project progress", Valid: true},
+		IsTest:            sql.NullBool{Bool: false, Valid: true},
+		IsAuto:            sql.NullBool{Bool: false, Valid: true},
+		IsCurrentRevision: sql.NullBool{Bool: true, Valid: true},
+		Result:            sql.NullString{String: "Completed", Valid: true},
+		IsDeleted:         sql.NullBool{Bool: false, Valid: true},
+		EngagementLevel:   sql.NullInt32{Int32: 5, Valid: true},
+		Weight:            sql.NullInt32{Int32: 1, Valid: true},
+		IsStar:            sql.NullBool{Bool: false, Valid: true},
+	}
+
+	require.NotNil(t, activity)
+	require.Equal(t, "Follow-up Call", activity.Subject.String)
+	require.True(t, activity.Duration.Valid)
+	require.Equal(t, int32(30), activity.Duration.Int32)
+	require.True(t, activity.IsCurrentRevision.Bool)
+
+	// Test that we can create activity parameters
+	createParams := db.CreateActivityParams{
+		ActivityTypeID:    uuid.New(),
+		Subject:           sql.NullString{String: "Team Meeting", Valid: true},
+		ActivityDateTime:  time.Now(),
+		Duration:          sql.NullInt32{Int32: 60, Valid: true},
+		Location:          sql.NullString{String: "Conference Room", Valid: true},
+		Details:           sql.NullString{String: "Weekly team sync", Valid: true},
+		IsTest:            sql.NullBool{Bool: false, Valid: true},
+		IsAuto:            sql.NullBool{Bool: false, Valid: true},
+		IsCurrentRevision: sql.NullBool{Bool: true, Valid: true},
+		Result:            sql.NullString{String: "Scheduled", Valid: true},
+		IsDeleted:         sql.NullBool{Bool: false, Valid: true},
+		EngagementLevel:   sql.NullInt32{Int32: 3, Valid: true},
+		Weight:            sql.NullInt32{Int32: 1, Valid: true},
+		IsStar:            sql.NullBool{Bool: false, Valid: true},
+	}
+
+	require.Equal(t, "Team Meeting", createParams.Subject.String)
+	require.True(t, createParams.Duration.Valid)
+	require.Equal(t, int32(60), createParams.Duration.Int32)
+	require.True(t, createParams.IsCurrentRevision.Bool)
+}

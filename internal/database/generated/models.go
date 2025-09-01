@@ -130,6 +130,76 @@ type Address struct {
 	UpdatedAt       sql.NullTime   `json:"updated_at"`
 }
 
+type Case struct {
+	ID           uuid.UUID      `json:"id"`
+	CaseTypeID   uuid.UUID      `json:"case_type_id"`
+	Subject      string         `json:"subject"`
+	StatusID     uuid.UUID      `json:"status_id"`
+	StartDate    time.Time      `json:"start_date"`
+	EndDate      sql.NullTime   `json:"end_date"`
+	Details      sql.NullString `json:"details"`
+	IsDeleted    sql.NullBool   `json:"is_deleted"`
+	CreatedDate  sql.NullTime   `json:"created_date"`
+	ModifiedDate sql.NullTime   `json:"modified_date"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	UpdatedAt    sql.NullTime   `json:"updated_at"`
+}
+
+type CaseActivity struct {
+	ID         uuid.UUID    `json:"id"`
+	CaseID     uuid.UUID    `json:"case_id"`
+	ActivityID uuid.UUID    `json:"activity_id"`
+	IsDeleted  sql.NullBool `json:"is_deleted"`
+	CreatedAt  sql.NullTime `json:"created_at"`
+	UpdatedAt  sql.NullTime `json:"updated_at"`
+}
+
+type CaseContact struct {
+	ID        uuid.UUID    `json:"id"`
+	CaseID    uuid.UUID    `json:"case_id"`
+	ContactID uuid.UUID    `json:"contact_id"`
+	Role      string       `json:"role"`
+	StartDate sql.NullTime `json:"start_date"`
+	EndDate   sql.NullTime `json:"end_date"`
+	IsActive  sql.NullBool `json:"is_active"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
+type CaseStatus struct {
+	ID         uuid.UUID      `json:"id"`
+	Name       string         `json:"name"`
+	Label      string         `json:"label"`
+	Grouping   sql.NullString `json:"grouping"`
+	Weight     sql.NullInt32  `json:"weight"`
+	IsActive   sql.NullBool   `json:"is_active"`
+	IsReserved sql.NullBool   `json:"is_reserved"`
+	Color      sql.NullString `json:"color"`
+	CreatedAt  sql.NullTime   `json:"created_at"`
+	UpdatedAt  sql.NullTime   `json:"updated_at"`
+}
+
+type CaseTag struct {
+	ID        uuid.UUID     `json:"id"`
+	CaseID    uuid.UUID     `json:"case_id"`
+	TagID     uuid.NullUUID `json:"tag_id"`
+	CreatedAt sql.NullTime  `json:"created_at"`
+	UpdatedAt sql.NullTime  `json:"updated_at"`
+}
+
+type CaseType struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	IsReserved  sql.NullBool   `json:"is_reserved"`
+	Weight      sql.NullInt32  `json:"weight"`
+	Definition  sql.NullString `json:"definition"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
 type Contact struct {
 	ID               uuid.UUID      `json:"id"`
 	ContactType      string         `json:"contact_type"`
@@ -373,6 +443,93 @@ type LocationType struct {
 	IsActive    sql.NullBool   `json:"is_active"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+type Membership struct {
+	ID                    uuid.UUID      `json:"id"`
+	ContactID             uuid.UUID      `json:"contact_id"`
+	MembershipTypeID      uuid.UUID      `json:"membership_type_id"`
+	StatusID              uuid.UUID      `json:"status_id"`
+	JoinDate              time.Time      `json:"join_date"`
+	StartDate             time.Time      `json:"start_date"`
+	EndDate               sql.NullTime   `json:"end_date"`
+	Source                sql.NullString `json:"source"`
+	IsOverride            sql.NullBool   `json:"is_override"`
+	StatusOverrideEndDate sql.NullTime   `json:"status_override_end_date"`
+	IsPayLater            sql.NullBool   `json:"is_pay_later"`
+	ContributionID        uuid.NullUUID  `json:"contribution_id"`
+	CampaignID            uuid.NullUUID  `json:"campaign_id"`
+	IsTest                sql.NullBool   `json:"is_test"`
+	NumTerms              sql.NullInt32  `json:"num_terms"`
+	MaxRelatedContacts    sql.NullInt32  `json:"max_related_contacts"`
+	CreatedAt             sql.NullTime   `json:"created_at"`
+	UpdatedAt             sql.NullTime   `json:"updated_at"`
+}
+
+type MembershipLog struct {
+	ID                    uuid.UUID      `json:"id"`
+	MembershipID          uuid.UUID      `json:"membership_id"`
+	ModifiedDate          sql.NullTime   `json:"modified_date"`
+	ModifiedByContactID   uuid.NullUUID  `json:"modified_by_contact_id"`
+	StatusID              uuid.NullUUID  `json:"status_id"`
+	StartDate             sql.NullTime   `json:"start_date"`
+	EndDate               sql.NullTime   `json:"end_date"`
+	MembershipTypeID      uuid.NullUUID  `json:"membership_type_id"`
+	IsOverride            sql.NullBool   `json:"is_override"`
+	StatusOverrideEndDate sql.NullTime   `json:"status_override_end_date"`
+	LogType               sql.NullString `json:"log_type"`
+	Description           sql.NullString `json:"description"`
+	CreatedAt             sql.NullTime   `json:"created_at"`
+	UpdatedAt             sql.NullTime   `json:"updated_at"`
+}
+
+type MembershipPayment struct {
+	ID              uuid.UUID      `json:"id"`
+	MembershipID    uuid.UUID      `json:"membership_id"`
+	ContributionID  uuid.UUID      `json:"contribution_id"`
+	PaymentAmount   string         `json:"payment_amount"`
+	PaymentCurrency sql.NullString `json:"payment_currency"`
+	PaymentDate     time.Time      `json:"payment_date"`
+	PaymentStatus   sql.NullString `json:"payment_status"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
+type MembershipStatus struct {
+	ID              uuid.UUID      `json:"id"`
+	Name            string         `json:"name"`
+	Label           string         `json:"label"`
+	StartEvent      sql.NullString `json:"start_event"`
+	EndEvent        sql.NullString `json:"end_event"`
+	IsCurrentMember sql.NullBool   `json:"is_current_member"`
+	IsAdmin         sql.NullBool   `json:"is_admin"`
+	Weight          sql.NullInt32  `json:"weight"`
+	IsActive        sql.NullBool   `json:"is_active"`
+	IsReserved      sql.NullBool   `json:"is_reserved"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
+type MembershipType struct {
+	ID                     uuid.UUID      `json:"id"`
+	Name                   string         `json:"name"`
+	Description            sql.NullString `json:"description"`
+	MemberOfContactID      uuid.NullUUID  `json:"member_of_contact_id"`
+	FinancialTypeID        uuid.NullUUID  `json:"financial_type_id"`
+	MinimumFee             sql.NullString `json:"minimum_fee"`
+	DurationUnit           string         `json:"duration_unit"`
+	DurationInterval       int32          `json:"duration_interval"`
+	PeriodType             string         `json:"period_type"`
+	FixedPeriodStartDay    sql.NullInt32  `json:"fixed_period_start_day"`
+	FixedPeriodRolloverDay sql.NullInt32  `json:"fixed_period_rollover_day"`
+	RelationshipTypeID     uuid.NullUUID  `json:"relationship_type_id"`
+	RelationshipDirection  sql.NullString `json:"relationship_direction"`
+	Visibility             sql.NullString `json:"visibility"`
+	Weight                 sql.NullInt32  `json:"weight"`
+	IsActive               sql.NullBool   `json:"is_active"`
+	IsReserved             sql.NullBool   `json:"is_reserved"`
+	CreatedAt              sql.NullTime   `json:"created_at"`
+	UpdatedAt              sql.NullTime   `json:"updated_at"`
 }
 
 type Participant struct {

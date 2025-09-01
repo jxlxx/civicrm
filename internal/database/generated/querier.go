@@ -12,6 +12,12 @@ import (
 )
 
 type Querier interface {
+	ActivateCaseContact(ctx context.Context, id uuid.UUID) error
+	ActivateCaseStatus(ctx context.Context, id uuid.UUID) error
+	ActivateCaseType(ctx context.Context, id uuid.UUID) error
+	ActivateMembershipStatus(ctx context.Context, id uuid.UUID) error
+	ActivateMembershipType(ctx context.Context, id uuid.UUID) error
+	CloseCase(ctx context.Context, arg CloseCaseParams) error
 	CountActiveActivityTypes(ctx context.Context) (int64, error)
 	CountActiveEventFees(ctx context.Context) (int64, error)
 	CountActivities(ctx context.Context) (int64, error)
@@ -29,6 +35,7 @@ type Querier interface {
 	CountContributionsByContact(ctx context.Context, contactID uuid.UUID) (int64, error)
 	CountContributionsByStatus(ctx context.Context, status sql.NullString) (int64, error)
 	CountContributionsByType(ctx context.Context, contributionType sql.NullString) (int64, error)
+	CountDiscounts(ctx context.Context, isActive sql.NullBool) (int64, error)
 	CountEventFees(ctx context.Context) (int64, error)
 	CountEventFeesByEvent(ctx context.Context, eventID uuid.UUID) (int64, error)
 	CountEvents(ctx context.Context) (int64, error)
@@ -57,33 +64,63 @@ type Querier interface {
 	CreateActivity(ctx context.Context, arg CreateActivityParams) (Activity, error)
 	CreateActivityContact(ctx context.Context, arg CreateActivityContactParams) (ActivityContact, error)
 	CreateActivityType(ctx context.Context, arg CreateActivityTypeParams) (ActivityType, error)
+	CreateCase(ctx context.Context, arg CreateCaseParams) (Case, error)
+	CreateCaseActivity(ctx context.Context, arg CreateCaseActivityParams) (CaseActivity, error)
+	CreateCaseContact(ctx context.Context, arg CreateCaseContactParams) (CaseContact, error)
+	CreateCaseStatus(ctx context.Context, arg CreateCaseStatusParams) (CaseStatus, error)
+	CreateCaseType(ctx context.Context, arg CreateCaseTypeParams) (CaseType, error)
 	CreateContact(ctx context.Context, arg CreateContactParams) (Contact, error)
 	CreateContribution(ctx context.Context, arg CreateContributionParams) (Contribution, error)
+	CreateDiscount(ctx context.Context, arg CreateDiscountParams) (Discount, error)
 	CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error)
 	CreateEventFee(ctx context.Context, arg CreateEventFeeParams) (EventFee, error)
 	CreateEventRegistration(ctx context.Context, arg CreateEventRegistrationParams) (EventRegistration, error)
 	CreateFinancialAccount(ctx context.Context, arg CreateFinancialAccountParams) (FinancialAccount, error)
 	CreateLineItem(ctx context.Context, arg CreateLineItemParams) (LineItem, error)
+	CreateMembership(ctx context.Context, arg CreateMembershipParams) (Membership, error)
+	CreateMembershipLog(ctx context.Context, arg CreateMembershipLogParams) (MembershipLog, error)
+	CreateMembershipPayment(ctx context.Context, arg CreateMembershipPaymentParams) (MembershipPayment, error)
+	CreateMembershipStatus(ctx context.Context, arg CreateMembershipStatusParams) (MembershipStatus, error)
+	CreateMembershipType(ctx context.Context, arg CreateMembershipTypeParams) (MembershipType, error)
 	CreateParticipant(ctx context.Context, arg CreateParticipantParams) (Participant, error)
 	CreatePriceField(ctx context.Context, arg CreatePriceFieldParams) (PriceField, error)
 	CreatePriceFieldValue(ctx context.Context, arg CreatePriceFieldValueParams) (PriceFieldValue, error)
 	CreatePriceSet(ctx context.Context, arg CreatePriceSetParams) (PriceSet, error)
+	DeactivateCaseContact(ctx context.Context, id uuid.UUID) error
+	DeactivateCaseStatus(ctx context.Context, id uuid.UUID) error
+	DeactivateCaseType(ctx context.Context, id uuid.UUID) error
+	DeactivateMembershipStatus(ctx context.Context, id uuid.UUID) error
+	DeactivateMembershipType(ctx context.Context, id uuid.UUID) error
 	DeleteActivity(ctx context.Context, id uuid.UUID) error
 	DeleteActivityContact(ctx context.Context, id uuid.UUID) error
 	DeleteActivityType(ctx context.Context, id uuid.UUID) error
+	DeleteCase(ctx context.Context, id uuid.UUID) error
+	DeleteCaseActivity(ctx context.Context, id uuid.UUID) error
+	DeleteCaseContact(ctx context.Context, id uuid.UUID) error
+	DeleteCaseStatus(ctx context.Context, id uuid.UUID) error
+	DeleteCaseType(ctx context.Context, id uuid.UUID) error
 	DeleteContact(ctx context.Context, id uuid.UUID) error
 	DeleteContribution(ctx context.Context, id uuid.UUID) error
+	DeleteDiscount(ctx context.Context, id uuid.UUID) error
 	DeleteEvent(ctx context.Context, id uuid.UUID) error
 	DeleteEventFee(ctx context.Context, id uuid.UUID) error
 	DeleteEventRegistration(ctx context.Context, id uuid.UUID) error
 	DeleteFinancialAccount(ctx context.Context, id uuid.UUID) error
 	DeleteLineItem(ctx context.Context, id uuid.UUID) error
 	DeleteLineItemsByEntity(ctx context.Context, arg DeleteLineItemsByEntityParams) error
+	DeleteMembership(ctx context.Context, id uuid.UUID) error
+	DeleteMembershipLog(ctx context.Context, id uuid.UUID) error
+	DeleteMembershipPayment(ctx context.Context, id uuid.UUID) error
+	DeleteMembershipStatus(ctx context.Context, id uuid.UUID) error
+	DeleteMembershipType(ctx context.Context, id uuid.UUID) error
 	DeleteParticipant(ctx context.Context, id uuid.UUID) error
 	DeletePriceField(ctx context.Context, id uuid.UUID) error
 	DeletePriceFieldValue(ctx context.Context, id uuid.UUID) error
 	DeletePriceSet(ctx context.Context, id uuid.UUID) error
+	ExtendMembership(ctx context.Context, arg ExtendMembershipParams) error
+	GetActiveCaseContacts(ctx context.Context, caseID uuid.UUID) ([]CaseContact, error)
 	GetActiveEventFees(ctx context.Context) ([]EventFee, error)
+	GetActiveMembershipByContact(ctx context.Context, contactID uuid.UUID) (Membership, error)
 	GetActivitiesByCampaign(ctx context.Context, campaignID uuid.NullUUID) ([]Activity, error)
 	GetActivitiesByContact(ctx context.Context, contactID uuid.UUID) ([]Activity, error)
 	GetActivitiesByDateRange(ctx context.Context, arg GetActivitiesByDateRangeParams) ([]Activity, error)
@@ -100,6 +137,30 @@ type Querier interface {
 	GetActivityType(ctx context.Context, id uuid.UUID) (ActivityType, error)
 	GetActivityTypeByLabel(ctx context.Context, label string) (ActivityType, error)
 	GetActivityTypeByName(ctx context.Context, name string) (ActivityType, error)
+	GetCase(ctx context.Context, id uuid.UUID) (Case, error)
+	GetCaseActivitiesByActivity(ctx context.Context, activityID uuid.UUID) (CaseActivity, error)
+	GetCaseActivitiesByCase(ctx context.Context, caseID uuid.UUID) ([]CaseActivity, error)
+	GetCaseActivitiesWithDetails(ctx context.Context, caseID uuid.UUID) ([]GetCaseActivitiesWithDetailsRow, error)
+	GetCaseActivity(ctx context.Context, id uuid.UUID) (CaseActivity, error)
+	GetCaseActivityCount(ctx context.Context, caseID uuid.UUID) (int64, error)
+	GetCaseActivityStats(ctx context.Context, caseID uuid.UUID) ([]GetCaseActivityStatsRow, error)
+	GetCaseContact(ctx context.Context, id uuid.UUID) (CaseContact, error)
+	GetCaseContactByCaseAndContact(ctx context.Context, arg GetCaseContactByCaseAndContactParams) (CaseContact, error)
+	GetCaseContactStats(ctx context.Context, isActive sql.NullBool) ([]GetCaseContactStatsRow, error)
+	GetCaseContactsByCase(ctx context.Context, caseID uuid.UUID) ([]CaseContact, error)
+	GetCaseContactsByContact(ctx context.Context, contactID uuid.UUID) ([]CaseContact, error)
+	GetCaseContactsByRole(ctx context.Context, arg GetCaseContactsByRoleParams) ([]CaseContact, error)
+	GetCaseCount(ctx context.Context) (int64, error)
+	GetCaseParticipantSummary(ctx context.Context) ([]GetCaseParticipantSummaryRow, error)
+	GetCaseStats(ctx context.Context, isActive sql.NullBool) ([]GetCaseStatsRow, error)
+	GetCaseStatus(ctx context.Context, id uuid.UUID) (CaseStatus, error)
+	GetCaseStatusByName(ctx context.Context, name string) (CaseStatus, error)
+	GetCaseStatusStats(ctx context.Context, isActive sql.NullBool) ([]GetCaseStatusStatsRow, error)
+	GetCaseTimeline(ctx context.Context, caseID uuid.UUID) ([]GetCaseTimelineRow, error)
+	GetCaseType(ctx context.Context, id uuid.UUID) (CaseType, error)
+	GetCaseTypeByName(ctx context.Context, name string) (CaseType, error)
+	GetCaseTypeStats(ctx context.Context, isActive sql.NullBool) ([]GetCaseTypeStatsRow, error)
+	GetCaseWithDetails(ctx context.Context, id uuid.UUID) (GetCaseWithDetailsRow, error)
 	GetContact(ctx context.Context, id uuid.UUID) (Contact, error)
 	GetContactByEmail(ctx context.Context, email sql.NullString) (Contact, error)
 	GetContactByPhone(ctx context.Context, phone sql.NullString) (Contact, error)
@@ -109,6 +170,8 @@ type Querier interface {
 	GetContributionsByContact(ctx context.Context, contactID uuid.UUID) ([]Contribution, error)
 	GetContributionsByDateRange(ctx context.Context, arg GetContributionsByDateRangeParams) ([]GetContributionsByDateRangeRow, error)
 	GetDefaultEventFee(ctx context.Context, eventID uuid.UUID) (EventFee, error)
+	GetDiscount(ctx context.Context, id uuid.UUID) (Discount, error)
+	GetDiscountByName(ctx context.Context, name string) (Discount, error)
 	GetEvent(ctx context.Context, id uuid.UUID) (Event, error)
 	GetEventByTitle(ctx context.Context, title string) (Event, error)
 	GetEventFee(ctx context.Context, id uuid.UUID) (EventFee, error)
@@ -124,6 +187,24 @@ type Querier interface {
 	GetLineItemsByEntity(ctx context.Context, arg GetLineItemsByEntityParams) ([]LineItem, error)
 	GetLineItemsByFinancialType(ctx context.Context, financialTypeID uuid.NullUUID) ([]LineItem, error)
 	GetLineItemsByPriceField(ctx context.Context, priceFieldID uuid.NullUUID) ([]LineItem, error)
+	GetMembership(ctx context.Context, id uuid.UUID) (Membership, error)
+	GetMembershipAuditTrail(ctx context.Context, membershipID uuid.UUID) ([]GetMembershipAuditTrailRow, error)
+	GetMembershipByContact(ctx context.Context, contactID uuid.UUID) ([]Membership, error)
+	GetMembershipChangeSummary(ctx context.Context, membershipID uuid.UUID) ([]GetMembershipChangeSummaryRow, error)
+	GetMembershipCount(ctx context.Context, arg GetMembershipCountParams) (int64, error)
+	GetMembershipLog(ctx context.Context, id uuid.UUID) (MembershipLog, error)
+	GetMembershipLogsByContact(ctx context.Context, contactID uuid.UUID) ([]MembershipLog, error)
+	GetMembershipLogsByMembership(ctx context.Context, membershipID uuid.UUID) ([]MembershipLog, error)
+	GetMembershipPayment(ctx context.Context, id uuid.UUID) (MembershipPayment, error)
+	GetMembershipPaymentStats(ctx context.Context, arg GetMembershipPaymentStatsParams) ([]GetMembershipPaymentStatsRow, error)
+	GetMembershipPaymentTotal(ctx context.Context, membershipID uuid.UUID) (int64, error)
+	GetMembershipPaymentsByContribution(ctx context.Context, contributionID uuid.UUID) (MembershipPayment, error)
+	GetMembershipPaymentsByMembership(ctx context.Context, membershipID uuid.UUID) ([]MembershipPayment, error)
+	GetMembershipStats(ctx context.Context, isTest sql.NullBool) ([]GetMembershipStatsRow, error)
+	GetMembershipStatus(ctx context.Context, id uuid.UUID) (MembershipStatus, error)
+	GetMembershipStatusByName(ctx context.Context, name string) (MembershipStatus, error)
+	GetMembershipType(ctx context.Context, id uuid.UUID) (MembershipType, error)
+	GetMembershipTypeByName(ctx context.Context, name string) (MembershipType, error)
 	GetParticipant(ctx context.Context, id uuid.UUID) (Participant, error)
 	GetParticipantByEventAndContact(ctx context.Context, arg GetParticipantByEventAndContactParams) (Participant, error)
 	GetParticipantsByCampaign(ctx context.Context, campaignID uuid.NullUUID) ([]Participant, error)
@@ -148,30 +229,78 @@ type Querier interface {
 	GetUpcomingRegistrations(ctx context.Context) ([]GetUpcomingRegistrationsRow, error)
 	HardDeleteActivity(ctx context.Context, id uuid.UUID) error
 	HardDeleteActivityContact(ctx context.Context, id uuid.UUID) error
+	HardDeleteCase(ctx context.Context, id uuid.UUID) error
+	HardDeleteCaseActivity(ctx context.Context, id uuid.UUID) error
 	ListActiveActivityTypes(ctx context.Context) ([]ActivityType, error)
+	ListActiveCaseContacts(ctx context.Context) ([]CaseContact, error)
+	ListActiveCaseStatus(ctx context.Context) ([]CaseStatus, error)
+	ListActiveCaseTypes(ctx context.Context) ([]CaseType, error)
 	ListActivePriceFieldValues(ctx context.Context) ([]PriceFieldValue, error)
 	ListActivePriceFields(ctx context.Context) ([]PriceField, error)
 	ListActivePriceSets(ctx context.Context) ([]PriceSet, error)
 	ListActivityTypes(ctx context.Context) ([]ActivityType, error)
+	ListAdminStatuses(ctx context.Context, isActive sql.NullBool) ([]MembershipStatus, error)
 	ListAllActivities(ctx context.Context) ([]Activity, error)
 	ListAllActivityContacts(ctx context.Context) ([]ActivityContact, error)
 	ListAllContacts(ctx context.Context, arg ListAllContactsParams) ([]Contact, error)
 	ListAllLineItems(ctx context.Context) ([]LineItem, error)
 	ListAllParticipants(ctx context.Context) ([]Participant, error)
 	ListAllRegistrations(ctx context.Context, arg ListAllRegistrationsParams) ([]ListAllRegistrationsRow, error)
+	ListCaseActivities(ctx context.Context) ([]CaseActivity, error)
+	ListCaseActivitiesByDateRange(ctx context.Context, arg ListCaseActivitiesByDateRangeParams) ([]CaseActivity, error)
+	ListCaseActivitiesByType(ctx context.Context, activityTypeID uuid.UUID) ([]CaseActivity, error)
+	ListCaseContacts(ctx context.Context) ([]CaseContact, error)
+	ListCaseContactsByDateRange(ctx context.Context, arg ListCaseContactsByDateRangeParams) ([]CaseContact, error)
+	ListCaseContactsByRole(ctx context.Context, role string) ([]CaseContact, error)
+	ListCaseStatus(ctx context.Context, isActive sql.NullBool) ([]CaseStatus, error)
+	ListCaseStatusByGrouping(ctx context.Context, arg ListCaseStatusByGroupingParams) ([]CaseStatus, error)
+	ListCaseTypes(ctx context.Context, isActive sql.NullBool) ([]CaseType, error)
+	ListCases(ctx context.Context) ([]Case, error)
+	ListCasesByContact(ctx context.Context, contactID uuid.UUID) ([]Case, error)
+	ListCasesByContactRole(ctx context.Context, arg ListCasesByContactRoleParams) ([]Case, error)
+	ListCasesByDateRange(ctx context.Context, arg ListCasesByDateRangeParams) ([]Case, error)
+	ListCasesByStatus(ctx context.Context, statusID uuid.UUID) ([]Case, error)
+	ListCasesByStatusGrouping(ctx context.Context, grouping sql.NullString) ([]Case, error)
+	ListCasesByType(ctx context.Context, caseTypeID uuid.UUID) ([]Case, error)
 	ListChildAccounts(ctx context.Context, arg ListChildAccountsParams) ([]FinancialAccount, error)
+	ListClosedCaseStatus(ctx context.Context, isActive sql.NullBool) ([]CaseStatus, error)
+	ListClosedCases(ctx context.Context) ([]Case, error)
 	ListContacts(ctx context.Context, arg ListContactsParams) ([]Contact, error)
 	ListContributions(ctx context.Context, arg ListContributionsParams) ([]ListContributionsRow, error)
 	ListContributionsByStatus(ctx context.Context, arg ListContributionsByStatusParams) ([]ListContributionsByStatusRow, error)
 	ListContributionsByType(ctx context.Context, arg ListContributionsByTypeParams) ([]ListContributionsByTypeRow, error)
+	ListCurrentMemberStatuses(ctx context.Context, isActive sql.NullBool) ([]MembershipStatus, error)
 	ListDefaultPriceFieldValues(ctx context.Context, isActive sql.NullBool) ([]PriceFieldValue, error)
+	ListDiscounts(ctx context.Context, isActive sql.NullBool) ([]Discount, error)
 	ListEventFees(ctx context.Context) ([]EventFee, error)
 	ListEventFeesByEvent(ctx context.Context, arg ListEventFeesByEventParams) ([]EventFee, error)
 	ListEvents(ctx context.Context, arg ListEventsParams) ([]Event, error)
+	ListExpiringMemberships(ctx context.Context, arg ListExpiringMembershipsParams) ([]Membership, error)
 	ListFinancialAccounts(ctx context.Context, isActive sql.NullBool) ([]FinancialAccount, error)
 	ListFinancialAccountsByType(ctx context.Context, arg ListFinancialAccountsByTypeParams) ([]FinancialAccount, error)
 	ListHeaderAccounts(ctx context.Context, arg ListHeaderAccountsParams) ([]FinancialAccount, error)
+	ListMembershipLogs(ctx context.Context) ([]MembershipLog, error)
+	ListMembershipLogsByDateRange(ctx context.Context, arg ListMembershipLogsByDateRangeParams) ([]MembershipLog, error)
+	ListMembershipLogsByModifier(ctx context.Context, modifiedByContactID uuid.NullUUID) ([]MembershipLog, error)
+	ListMembershipLogsByStatus(ctx context.Context, statusID uuid.NullUUID) ([]MembershipLog, error)
+	ListMembershipLogsByType(ctx context.Context, logType sql.NullString) ([]MembershipLog, error)
+	ListMembershipPayments(ctx context.Context) ([]MembershipPayment, error)
+	ListMembershipPaymentsByCurrency(ctx context.Context, paymentCurrency sql.NullString) ([]MembershipPayment, error)
+	ListMembershipPaymentsByDateRange(ctx context.Context, arg ListMembershipPaymentsByDateRangeParams) ([]MembershipPayment, error)
+	ListMembershipPaymentsByStatus(ctx context.Context, paymentStatus sql.NullString) ([]MembershipPayment, error)
+	ListMembershipStatus(ctx context.Context, isActive sql.NullBool) ([]MembershipStatus, error)
+	ListMembershipStatusByEvent(ctx context.Context, arg ListMembershipStatusByEventParams) ([]MembershipStatus, error)
+	ListMembershipTypes(ctx context.Context, isActive sql.NullBool) ([]MembershipType, error)
+	ListMembershipTypesByPeriodType(ctx context.Context, arg ListMembershipTypesByPeriodTypeParams) ([]MembershipType, error)
+	ListMembershipTypesByVisibility(ctx context.Context, arg ListMembershipTypesByVisibilityParams) ([]MembershipType, error)
+	ListMemberships(ctx context.Context, isTest sql.NullBool) ([]Membership, error)
+	ListMembershipsByCampaign(ctx context.Context, arg ListMembershipsByCampaignParams) ([]Membership, error)
+	ListMembershipsByDateRange(ctx context.Context, arg ListMembershipsByDateRangeParams) ([]Membership, error)
+	ListMembershipsByStatus(ctx context.Context, arg ListMembershipsByStatusParams) ([]Membership, error)
+	ListMembershipsByType(ctx context.Context, arg ListMembershipsByTypeParams) ([]Membership, error)
 	ListMultiRecordActivityTypes(ctx context.Context) ([]ActivityType, error)
+	ListOpenCaseStatus(ctx context.Context, isActive sql.NullBool) ([]CaseStatus, error)
+	ListOpenCases(ctx context.Context) ([]Case, error)
 	ListPastEvents(ctx context.Context, arg ListPastEventsParams) ([]Event, error)
 	ListPriceFieldValues(ctx context.Context, priceFieldID uuid.UUID) ([]PriceFieldValue, error)
 	ListPriceFieldValuesByFinancialType(ctx context.Context, arg ListPriceFieldValuesByFinancialTypeParams) ([]PriceFieldValue, error)
@@ -183,18 +312,31 @@ type Querier interface {
 	ListPriceSetsByFinancialType(ctx context.Context, arg ListPriceSetsByFinancialTypeParams) ([]PriceSet, error)
 	ListRegistrationsByStatus(ctx context.Context, arg ListRegistrationsByStatusParams) ([]ListRegistrationsByStatusRow, error)
 	ListReservedActivityTypes(ctx context.Context) ([]ActivityType, error)
+	ListReservedCaseStatus(ctx context.Context, isActive sql.NullBool) ([]CaseStatus, error)
+	ListReservedCaseTypes(ctx context.Context, isActive sql.NullBool) ([]CaseType, error)
 	ListTargetActivityTypes(ctx context.Context) ([]ActivityType, error)
 	ListTestParticipants(ctx context.Context, isTest sql.NullBool) ([]Participant, error)
 	ListUpcomingEvents(ctx context.Context, arg ListUpcomingEventsParams) ([]Event, error)
 	SearchActivities(ctx context.Context, subject sql.NullString) ([]Activity, error)
 	SearchActivityContacts(ctx context.Context, role sql.NullString) ([]ActivityContact, error)
 	SearchActivityTypes(ctx context.Context, name string) ([]ActivityType, error)
+	SearchCaseActivities(ctx context.Context, subject sql.NullString) ([]CaseActivity, error)
+	SearchCaseContacts(ctx context.Context, firstName sql.NullString) ([]CaseContact, error)
+	SearchCaseStatus(ctx context.Context, arg SearchCaseStatusParams) ([]CaseStatus, error)
+	SearchCaseTypes(ctx context.Context, arg SearchCaseTypesParams) ([]CaseType, error)
+	SearchCases(ctx context.Context, subject string) ([]Case, error)
 	SearchContacts(ctx context.Context, arg SearchContactsParams) ([]Contact, error)
 	SearchContributions(ctx context.Context, arg SearchContributionsParams) ([]SearchContributionsRow, error)
+	SearchDiscounts(ctx context.Context, arg SearchDiscountsParams) ([]Discount, error)
 	SearchEventFees(ctx context.Context, arg SearchEventFeesParams) ([]EventFee, error)
 	SearchEvents(ctx context.Context, arg SearchEventsParams) ([]Event, error)
 	SearchFinancialAccounts(ctx context.Context, arg SearchFinancialAccountsParams) ([]FinancialAccount, error)
 	SearchLineItems(ctx context.Context, label string) ([]LineItem, error)
+	SearchMembershipLogs(ctx context.Context, firstName sql.NullString) ([]MembershipLog, error)
+	SearchMembershipPayments(ctx context.Context, firstName sql.NullString) ([]MembershipPayment, error)
+	SearchMembershipStatus(ctx context.Context, arg SearchMembershipStatusParams) ([]MembershipStatus, error)
+	SearchMembershipTypes(ctx context.Context, arg SearchMembershipTypesParams) ([]MembershipType, error)
+	SearchMemberships(ctx context.Context, arg SearchMembershipsParams) ([]Membership, error)
 	SearchParticipants(ctx context.Context, source sql.NullString) ([]Participant, error)
 	SearchPriceFieldValues(ctx context.Context, arg SearchPriceFieldValuesParams) ([]PriceFieldValue, error)
 	SearchPriceFields(ctx context.Context, arg SearchPriceFieldsParams) ([]PriceField, error)
@@ -202,14 +344,33 @@ type Querier interface {
 	UpdateActivity(ctx context.Context, arg UpdateActivityParams) (Activity, error)
 	UpdateActivityContact(ctx context.Context, arg UpdateActivityContactParams) (ActivityContact, error)
 	UpdateActivityType(ctx context.Context, arg UpdateActivityTypeParams) (ActivityType, error)
+	UpdateCase(ctx context.Context, arg UpdateCaseParams) (Case, error)
+	UpdateCaseActivity(ctx context.Context, arg UpdateCaseActivityParams) (CaseActivity, error)
+	UpdateCaseContact(ctx context.Context, arg UpdateCaseContactParams) (CaseContact, error)
+	UpdateCaseContactRole(ctx context.Context, arg UpdateCaseContactRoleParams) error
+	UpdateCaseStatus(ctx context.Context, arg UpdateCaseStatusParams) (CaseStatus, error)
+	UpdateCaseStatusById(ctx context.Context, arg UpdateCaseStatusByIdParams) error
+	UpdateCaseStatusWeight(ctx context.Context, arg UpdateCaseStatusWeightParams) error
+	UpdateCaseType(ctx context.Context, arg UpdateCaseTypeParams) (CaseType, error)
+	UpdateCaseTypeWeight(ctx context.Context, arg UpdateCaseTypeWeightParams) error
 	UpdateContact(ctx context.Context, arg UpdateContactParams) (Contact, error)
 	UpdateContribution(ctx context.Context, arg UpdateContributionParams) (Contribution, error)
+	UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) (Discount, error)
 	UpdateEvent(ctx context.Context, arg UpdateEventParams) (Event, error)
 	UpdateEventFee(ctx context.Context, arg UpdateEventFeeParams) (EventFee, error)
 	UpdateEventRegistration(ctx context.Context, arg UpdateEventRegistrationParams) (EventRegistration, error)
 	UpdateFinancialAccount(ctx context.Context, arg UpdateFinancialAccountParams) (FinancialAccount, error)
 	UpdateLineItem(ctx context.Context, arg UpdateLineItemParams) (LineItem, error)
+	UpdateMembership(ctx context.Context, arg UpdateMembershipParams) (Membership, error)
+	UpdateMembershipLog(ctx context.Context, arg UpdateMembershipLogParams) (MembershipLog, error)
+	UpdateMembershipPayment(ctx context.Context, arg UpdateMembershipPaymentParams) (MembershipPayment, error)
+	UpdateMembershipStatus(ctx context.Context, arg UpdateMembershipStatusParams) (MembershipStatus, error)
+	UpdateMembershipStatusById(ctx context.Context, arg UpdateMembershipStatusByIdParams) error
+	UpdateMembershipStatusWeight(ctx context.Context, arg UpdateMembershipStatusWeightParams) error
+	UpdateMembershipType(ctx context.Context, arg UpdateMembershipTypeParams) (MembershipType, error)
+	UpdateMembershipTypeWeight(ctx context.Context, arg UpdateMembershipTypeWeightParams) error
 	UpdateParticipant(ctx context.Context, arg UpdateParticipantParams) (Participant, error)
+	UpdatePaymentStatus(ctx context.Context, arg UpdatePaymentStatusParams) error
 	UpdatePriceField(ctx context.Context, arg UpdatePriceFieldParams) (PriceField, error)
 	UpdatePriceFieldValue(ctx context.Context, arg UpdatePriceFieldValueParams) (PriceFieldValue, error)
 	UpdatePriceSet(ctx context.Context, arg UpdatePriceSetParams) (PriceSet, error)
