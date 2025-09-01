@@ -72,6 +72,15 @@ This document outlines the database architecture and data modeling strategy for 
 - **Report Subscriptions**: Automated report delivery
 - **Report Permissions**: Role-based access control
 
+#### **11. Authentication & Authorization System** ✅ **NEW!**
+- **Users**: User accounts with password hashing and admin flags
+- **ACL Roles**: Predefined roles (administrator, user, everyone, authenticated)
+- **ACL Rules**: Fine-grained permissions for View/Edit/Delete/Create operations
+- **ACL Entity Roles**: Role assignments to users and contacts
+- **ACL Cache**: Performance optimization for permission checks
+- **UF Match**: Links between users and CiviCRM contacts
+- **Permission System**: Comprehensive permission checking across all entities
+
 ### **🚧 Next Priority: System & Configuration**
 - **Domain**: Multi-domain support
 - **Setting**: System settings and configuration
@@ -80,7 +89,7 @@ This document outlines the database architecture and data modeling strategy for 
 ## Database Technology Stack
 
 ### Primary Database
-- **PostgreSQL 13+** - Primary database with advanced features
+- **PostgreSQL 15+** - Primary database with advanced features
 - **MySQL 8.0+** - Alternative database option for compatibility
 
 ### Tools & Libraries
@@ -90,6 +99,43 @@ This document outlines the database architecture and data modeling strategy for 
 - **database/sql** - Go's standard database interface
 
 ## Database Architecture
+
+### ACL System Architecture
+The Access Control List (ACL) system provides enterprise-grade security with fine-grained permissions:
+
+#### **Core ACL Tables**
+- **`acl_roles`**: Predefined roles (administrator, user, everyone, authenticated)
+- **`acls`**: Permission rules linking roles to operations on specific objects
+- **`acl_entity_roles`**: Role assignments to users and contacts
+- **`acl_cache`**: Performance optimization for permission checks
+- **`acl_contact_cache`**: User-specific accessible contact lists
+
+#### **Permission Operations**
+- **View**: Read access to records
+- **Edit**: Modify existing records
+- **Delete**: Remove records
+- **Create**: Add new records
+
+#### **ACL Rule Structure**
+```sql
+-- Example: Administrator can view all contacts
+INSERT INTO acls (name, deny, entity_table, entity_id, operation, object_table, object_id, priority) VALUES
+    ('Admin View All Contacts', FALSE, 'acl_roles', 
+     (SELECT id FROM acl_roles WHERE name = 'administrator'), 
+     'View', 'contacts', NULL, 1);
+```
+
+#### **Performance Features**
+- **ACL Caching**: Automatic caching of permission results
+- **Contact Cache**: Pre-computed lists of accessible contacts per user
+- **Priority System**: Higher priority rules override lower ones
+- **Deny Override**: Deny rules can override allow rules
+
+#### **Security Features**
+- **Multi-Domain**: Separate ACL rules per domain
+- **Contact-Level**: Fine-grained control over contact access
+- **Operation-Specific**: Different permissions for different operations
+- **Role-Based**: Flexible role assignment system
 
 ### Schema Organization
 ```
@@ -126,29 +172,31 @@ Each migration file follows the pattern: `{version}_{description}.sql`
 
 #### **Completed Migrations**
 - **001_utilities.sql** - Database utility functions
-- **002_contacts.sql** - Core contact tables
-- **003_events.sql** - Event management tables
-- **004_contributions.sql** - Contribution tracking
-- **005_event_registrations.sql** - Event registration system
-- **006_core_infrastructure.sql** - Lookup tables and core data
-- **007_contact_details.sql** - Contact detail tables
-- **008_contact_relationships.sql** - Contact relationships and groups
-- **009_seed_core_data.sql** - Core infrastructure seed data
-- **010_financial_infrastructure.sql** - Financial system tables
-- **011_event_enhancement.sql** - Event enhancement tables
-- **012_activity_system.sql** - Activity management system
-- **013_seed_activity_data.sql** - Activity system seed data
-- **014_membership_system.sql** - Membership management tables
-- **015_seed_membership_data.sql** - Membership system seed data
-- **016_case_management.sql** - Case management system
-- **017_seed_case_data.sql** - Case management seed data
-- **018_campaign_management.sql** - Campaign management system
-- **019_seed_campaign_data.sql** - Campaign system seed data
-- **020_tagging_system.sql** - Universal tagging system
-- **021_survey_system.sql** - Survey management system
-- **022_seed_survey_data.sql** - Survey system seed data
-- **023_reporting_system.sql** - Reporting and analytics system
-- **024_seed_reporting_data.sql** - Reporting system seed data
+- **002_acls.sql** - Access Control List system tables
+- **003_users.sql** - User authentication and authorization tables
+- **004_contacts.sql** - Core contact tables
+- **005_events.sql** - Event management tables
+- **006_contributions.sql** - Contribution tracking
+- **007_event_registrations.sql** - Event registration system
+- **008_core_infrastructure.sql** - Lookup tables and core data
+- **009_contact_details.sql** - Contact detail tables
+- **010_contact_relationships.sql** - Contact relationships and groups
+- **011_seed_core_data.sql** - Core infrastructure seed data (includes ACL roles and admin user)
+- **012_financial_infrastructure.sql** - Financial system tables
+- **013_event_enhancement.sql** - Event enhancement tables
+- **014_activity_system.sql** - Activity management system
+- **015_seed_activity_data.sql** - Activity system seed data
+- **016_membership_system.sql** - Membership management tables
+- **017_seed_membership_data.sql** - Membership system seed data
+- **018_case_management.sql** - Case management system
+- **019_seed_case_data.sql** - Case management seed data
+- **020_campaign_management.sql** - Campaign management system
+- **021_seed_campaign_data.sql** - Campaign system seed data
+- **022_tagging_system.sql** - Universal tagging system
+- **023_survey_system.sql** - Survey management system
+- **024_seed_survey_data.sql** - Survey system seed data
+- **025_reporting_system.sql** - Reporting and analytics system
+- **026_seed_reporting_data.sql** - Reporting system seed data
 
 ```sql
 -- 001_base_tables.sql
@@ -188,6 +236,15 @@ sqlc migrate down
 
 # Check migration status
 sqlc migrate status
+
+# Migrate to specific version
+make migrate-to VERSION=10
+
+# Check current migration status
+make migrate-status
+
+# Rollback to specific version
+make migrate-rollback
 ```
 
 ## SQL Code Generation with sqlc
@@ -217,6 +274,41 @@ sql:
 
 ### Query Files
 Each entity has its own query file with CRUD operations:
+
+#### **ACL & Permission Queries**
+The ACL system includes comprehensive query files for security operations:
+
+- **`acls.sql`**: ACL role and rule management
+- **`users.sql`**: User authentication and management  
+- **`permissions.sql`**: Permission checking and accessible data retrieval
+
+#### **Permission Checking Examples**
+```sql
+-- Check if user can view a specific contact
+-- name: CheckContactPermission :one
+SELECT COUNT(*) > 0 as has_permission FROM acls a
+INNER JOIN acl_entity_roles aer ON a.entity_id = aer.acl_role_id
+WHERE aer.entity_table = 'users' 
+AND aer.entity_id = $1 
+AND a.entity_table = 'acl_roles'
+AND a.operation = 'View'
+AND a.object_table = 'contacts'
+AND (a.object_id = $2 OR a.object_id IS NULL)
+AND a.deny = false
+AND a.is_active = true
+AND aer.is_active = true
+ORDER BY a.priority ASC
+LIMIT 1;
+
+-- Get all contacts user can view
+-- name: GetUserAccessibleContacts :many
+SELECT DISTINCT c.* FROM contacts c
+INNER JOIN acl_contact_cache acc ON c.id = acc.contact_id
+WHERE acc.user_id = $1 
+AND acc.operation = 'View'
+ORDER BY c.last_name, c.first_name
+LIMIT $2 OFFSET $3;
+```
 
 ```sql
 -- internal/database/queries/contacts.sql
@@ -565,7 +657,7 @@ This checklist tracks all entities from the original PHP CiviCRM project. Check 
 - [ ] **Subscription History** - Subscription change history
 
 ### Total Entities: 95+
-**Progress: 58/95 (61%)**
+**Progress: 62/95 (65%)**
 
 ---
 
