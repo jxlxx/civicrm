@@ -1023,6 +1023,29 @@ type TagSet struct {
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
 }
 
+type UfMatch struct {
+	ID        uuid.UUID      `json:"id"`
+	DomainID  uuid.UUID      `json:"domain_id"`
+	UfID      uuid.UUID      `json:"uf_id"`
+	UfName    sql.NullString `json:"uf_name"`
+	ContactID uuid.NullUUID  `json:"contact_id"`
+	Language  sql.NullString `json:"language"`
+	CreatedAt sql.NullTime   `json:"created_at"`
+	UpdatedAt sql.NullTime   `json:"updated_at"`
+}
+
+type User struct {
+	ID             uuid.UUID    `json:"id"`
+	Username       string       `json:"username"`
+	Email          string       `json:"email"`
+	HashedPassword string       `json:"hashed_password"`
+	IsActive       sql.NullBool `json:"is_active"`
+	IsAdmin        sql.NullBool `json:"is_admin"`
+	LastLogin      sql.NullTime `json:"last_login"`
+	CreatedAt      sql.NullTime `json:"created_at"`
+	UpdatedAt      sql.NullTime `json:"updated_at"`
+}
+
 type Website struct {
 	ID            uuid.UUID     `json:"id"`
 	ContactID     uuid.UUID     `json:"contact_id"`

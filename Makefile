@@ -83,6 +83,21 @@ migrate-rollback:
 	export PGSSLMODE=disable; \
 	tern migrate -c tern.conf --migrations migrations --target $$version
 
+# Migrate to specific version
+migrate-to:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Usage: make migrate-to VERSION=<number>"; \
+		echo "Example: make migrate-to VERSION=10"; \
+		exit 1; \
+	fi; \
+	export PGHOST=localhost; \
+	export PGPORT=5432; \
+	export PGDATABASE=civicrm; \
+	export PGUSER=civicrm; \
+	export PGPASSWORD=civicrm_dev_password; \
+	export PGSSLMODE=disable; \
+	tern migrate -c tern.conf --migrations migrations --target $(VERSION)
+
 # Show migration status
 migrate-status:
 	@echo "Migration status:"

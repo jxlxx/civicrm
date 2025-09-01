@@ -187,8 +187,8 @@ INSERT INTO users (username, email, hashed_password, is_admin) VALUES
     ('admin', 'admin@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', TRUE); -- password: password
 
 -- Create admin contact and link to user
-INSERT INTO contacts (contact_type, first_name, last_name, email, is_active) VALUES
-    ('Individual', 'System', 'Administrator', 'admin@example.com', TRUE);
+INSERT INTO contacts (contact_type, first_name, last_name, email) VALUES
+    ('Individual', 'System', 'Administrator', 'admin@example.com');
 
 -- Link admin user to admin contact via uf_match
 INSERT INTO uf_match (uf_id, uf_name, contact_id) VALUES

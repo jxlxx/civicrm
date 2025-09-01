@@ -13,6 +13,7 @@ require (
 	github.com/oapi-codegen/runtime v1.1.2
 	github.com/redis/go-redis/v9 v9.3.0
 	github.com/spf13/viper v1.17.0
+	github.com/sqlc-dev/pqtype v0.3.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.17.0
 )

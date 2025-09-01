@@ -34,6 +34,15 @@ type Querier interface {
 	ActivateSurveyQuestion(ctx context.Context, id uuid.UUID) error
 	ActivateTag(ctx context.Context, id uuid.UUID) error
 	ActivateTagSet(ctx context.Context, id uuid.UUID) error
+	AssignUserToRole(ctx context.Context, arg AssignUserToRoleParams) (AclEntityRole, error)
+	CheckCampaignPermission(ctx context.Context, arg CheckCampaignPermissionParams) (bool, error)
+	CheckCasePermission(ctx context.Context, arg CheckCasePermissionParams) (bool, error)
+	CheckContactPermission(ctx context.Context, arg CheckContactPermissionParams) (bool, error)
+	CheckContributionPermission(ctx context.Context, arg CheckContributionPermissionParams) (bool, error)
+	CheckEventPermission(ctx context.Context, arg CheckEventPermissionParams) (bool, error)
+	CheckGroupPermission(ctx context.Context, arg CheckGroupPermissionParams) (bool, error)
+	CheckMembershipPermission(ctx context.Context, arg CheckMembershipPermissionParams) (bool, error)
+	CheckUserPermission(ctx context.Context, arg CheckUserPermissionParams) (bool, error)
 	CloseCase(ctx context.Context, arg CloseCaseParams) error
 	CountActiveActivityTypes(ctx context.Context) (int64, error)
 	CountActiveEventFees(ctx context.Context) (int64, error)
@@ -78,6 +87,18 @@ type Querier interface {
 	CountRegistrationsByStatus(ctx context.Context, status sql.NullString) (int64, error)
 	CountReservedActivityTypes(ctx context.Context) (int64, error)
 	CountUpcomingEvents(ctx context.Context) (int64, error)
+	CountUserAccessibleCampaigns(ctx context.Context, arg CountUserAccessibleCampaignsParams) (int64, error)
+	CountUserAccessibleCases(ctx context.Context, arg CountUserAccessibleCasesParams) (int64, error)
+	CountUserAccessibleContacts(ctx context.Context, arg CountUserAccessibleContactsParams) (int64, error)
+	CountUserAccessibleContributions(ctx context.Context, arg CountUserAccessibleContributionsParams) (int64, error)
+	CountUserAccessibleEvents(ctx context.Context, arg CountUserAccessibleEventsParams) (int64, error)
+	CountUserAccessibleGroups(ctx context.Context, arg CountUserAccessibleGroupsParams) (int64, error)
+	CountUserAccessibleMemberships(ctx context.Context, arg CountUserAccessibleMembershipsParams) (int64, error)
+	CreateACL(ctx context.Context, arg CreateACLParams) (Acl, error)
+	CreateACLCache(ctx context.Context, arg CreateACLCacheParams) (AclCache, error)
+	CreateACLContactCache(ctx context.Context, arg CreateACLContactCacheParams) (AclContactCache, error)
+	CreateACLEntityRole(ctx context.Context, arg CreateACLEntityRoleParams) (AclEntityRole, error)
+	CreateACLRole(ctx context.Context, arg CreateACLRoleParams) (AclRole, error)
 	CreateActivity(ctx context.Context, arg CreateActivityParams) (Activity, error)
 	CreateActivityContact(ctx context.Context, arg CreateActivityContactParams) (ActivityContact, error)
 	CreateActivityType(ctx context.Context, arg CreateActivityTypeParams) (ActivityType, error)
@@ -127,6 +148,8 @@ type Querier interface {
 	CreateSurveyResponseAnswer(ctx context.Context, arg CreateSurveyResponseAnswerParams) (SurveyResponseAnswer, error)
 	CreateTag(ctx context.Context, arg CreateTagParams) (Tag, error)
 	CreateTagSet(ctx context.Context, arg CreateTagSetParams) (TagSet, error)
+	CreateUFMatch(ctx context.Context, arg CreateUFMatchParams) (UfMatch, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeactivateCampaign(ctx context.Context, id uuid.UUID) error
 	DeactivateCampaignContact(ctx context.Context, id uuid.UUID) error
 	DeactivateCampaignGroup(ctx context.Context, id uuid.UUID) error
@@ -149,6 +172,12 @@ type Querier interface {
 	DeactivateSurveyQuestion(ctx context.Context, id uuid.UUID) error
 	DeactivateTag(ctx context.Context, id uuid.UUID) error
 	DeactivateTagSet(ctx context.Context, id uuid.UUID) error
+	DeleteACL(ctx context.Context, id uuid.UUID) error
+	DeleteACLCache(ctx context.Context, contactID uuid.NullUUID) error
+	DeleteACLContactCache(ctx context.Context, arg DeleteACLContactCacheParams) error
+	DeleteACLContactCacheByContact(ctx context.Context, arg DeleteACLContactCacheByContactParams) error
+	DeleteACLEntityRole(ctx context.Context, id uuid.UUID) error
+	DeleteACLRole(ctx context.Context, id uuid.UUID) error
 	DeleteActivity(ctx context.Context, id uuid.UUID) error
 	DeleteActivityContact(ctx context.Context, id uuid.UUID) error
 	DeleteActivityType(ctx context.Context, id uuid.UUID) error
@@ -203,7 +232,17 @@ type Querier interface {
 	DeleteSurveyResponseAnswersByResponse(ctx context.Context, surveyResponseID uuid.UUID) error
 	DeleteTag(ctx context.Context, id uuid.UUID) error
 	DeleteTagSet(ctx context.Context, id uuid.UUID) error
+	DeleteUFMatch(ctx context.Context, id uuid.UUID) error
+	DeleteUser(ctx context.Context, id uuid.UUID) error
 	ExtendMembership(ctx context.Context, arg ExtendMembershipParams) error
+	GetACL(ctx context.Context, id uuid.UUID) (Acl, error)
+	GetACLCache(ctx context.Context, contactID uuid.NullUUID) ([]AclCache, error)
+	GetACLContactCache(ctx context.Context, arg GetACLContactCacheParams) ([]AclContactCache, error)
+	GetACLContactCacheByContact(ctx context.Context, arg GetACLContactCacheByContactParams) ([]AclContactCache, error)
+	GetACLEntityRole(ctx context.Context, id uuid.UUID) (AclEntityRole, error)
+	GetACLRole(ctx context.Context, id uuid.UUID) (AclRole, error)
+	GetACLRoleByName(ctx context.Context, name string) (AclRole, error)
+	GetACLStats(ctx context.Context) (GetACLStatsRow, error)
 	GetActiveCampaignContacts(ctx context.Context, campaignID uuid.UUID) ([]CampaignContact, error)
 	GetActiveCampaignGroups(ctx context.Context, campaignID uuid.UUID) ([]CampaignGroup, error)
 	GetActiveCaseContacts(ctx context.Context, caseID uuid.UUID) ([]CaseContact, error)
@@ -312,6 +351,7 @@ type Querier interface {
 	GetContactByPhone(ctx context.Context, phone sql.NullString) (Contact, error)
 	GetContactsByLocation(ctx context.Context, arg GetContactsByLocationParams) ([]Contact, error)
 	GetContactsByType(ctx context.Context, contactType string) ([]Contact, error)
+	GetContactsForUser(ctx context.Context, arg GetContactsForUserParams) ([]Contact, error)
 	GetContribution(ctx context.Context, id uuid.UUID) (Contribution, error)
 	GetContributionsByContact(ctx context.Context, contactID uuid.UUID) ([]Contribution, error)
 	GetContributionsByDateRange(ctx context.Context, arg GetContributionsByDateRangeParams) ([]GetContributionsByDateRangeRow, error)
@@ -346,9 +386,11 @@ type Querier interface {
 	GetEventRegistration(ctx context.Context, id uuid.UUID) (EventRegistration, error)
 	GetEventRegistrationByEventAndContact(ctx context.Context, arg GetEventRegistrationByEventAndContactParams) (EventRegistration, error)
 	GetEventsByDateRange(ctx context.Context, arg GetEventsByDateRangeParams) ([]Event, error)
+	GetEventsForUser(ctx context.Context, arg GetEventsForUserParams) ([]Event, error)
 	GetFinancialAccount(ctx context.Context, id uuid.UUID) (FinancialAccount, error)
 	GetFinancialAccountByCode(ctx context.Context, accountCode sql.NullString) (FinancialAccount, error)
 	GetFinancialAccountByName(ctx context.Context, name string) (FinancialAccount, error)
+	GetGroupsForUser(ctx context.Context, arg GetGroupsForUserParams) ([]Group, error)
 	GetLatestReportResult(ctx context.Context, reportInstanceID uuid.UUID) (ReportResult, error)
 	GetLineItem(ctx context.Context, id uuid.UUID) (LineItem, error)
 	GetLineItemsByEntity(ctx context.Context, arg GetLineItemsByEntityParams) ([]LineItem, error)
@@ -423,6 +465,8 @@ type Querier interface {
 	GetReportTemplateSummary(ctx context.Context, isActive sql.NullBool) ([]GetReportTemplateSummaryRow, error)
 	GetReportTemplatesByType(ctx context.Context, arg GetReportTemplatesByTypeParams) ([]ReportTemplate, error)
 	GetRequiredSurveyQuestions(ctx context.Context, arg GetRequiredSurveyQuestionsParams) ([]SurveyQuestion, error)
+	GetRolePermissionMatrix(ctx context.Context, entityID uuid.NullUUID) ([]GetRolePermissionMatrixRow, error)
+	GetRolePermissionSummary(ctx context.Context, entityID uuid.NullUUID) ([]GetRolePermissionSummaryRow, error)
 	GetScheduledReportInstances(ctx context.Context, isActive sql.NullBool) ([]ReportInstance, error)
 	GetSurvey(ctx context.Context, id uuid.UUID) (Survey, error)
 	GetSurveyAnalytics(ctx context.Context, surveyID uuid.UUID) ([]GetSurveyAnalyticsRow, error)
@@ -475,8 +519,34 @@ type Querier interface {
 	GetTotalContributions(ctx context.Context) (int64, error)
 	GetTotalContributionsByContact(ctx context.Context, contactID uuid.UUID) (int64, error)
 	GetTotalLineItemsByEntity(ctx context.Context, arg GetTotalLineItemsByEntityParams) (interface{}, error)
+	GetUFMatch(ctx context.Context, id uuid.UUID) (UfMatch, error)
+	GetUFMatchByContactID(ctx context.Context, contactID uuid.NullUUID) (UfMatch, error)
+	GetUFMatchByUserID(ctx context.Context, ufID uuid.UUID) (UfMatch, error)
+	GetUFMatchByUsername(ctx context.Context, ufName sql.NullString) (UfMatch, error)
 	GetUpcomingActivities(ctx context.Context) ([]Activity, error)
 	GetUpcomingRegistrations(ctx context.Context) ([]GetUpcomingRegistrationsRow, error)
+	GetUser(ctx context.Context, id uuid.UUID) (User, error)
+	GetUserAccessibleCampaigns(ctx context.Context, arg GetUserAccessibleCampaignsParams) ([]Campaign, error)
+	GetUserAccessibleCases(ctx context.Context, arg GetUserAccessibleCasesParams) ([]Case, error)
+	GetUserAccessibleContacts(ctx context.Context, arg GetUserAccessibleContactsParams) ([]Contact, error)
+	GetUserAccessibleContributions(ctx context.Context, arg GetUserAccessibleContributionsParams) ([]Contribution, error)
+	GetUserAccessibleEvents(ctx context.Context, arg GetUserAccessibleEventsParams) ([]Event, error)
+	GetUserAccessibleGroups(ctx context.Context, arg GetUserAccessibleGroupsParams) ([]Group, error)
+	GetUserAccessibleMemberships(ctx context.Context, arg GetUserAccessibleMembershipsParams) ([]Membership, error)
+	GetUserByEmail(ctx context.Context, email string) (User, error)
+	GetUserByEmailWithContact(ctx context.Context, email string) (GetUserByEmailWithContactRow, error)
+	GetUserByUsername(ctx context.Context, username string) (User, error)
+	GetUserByUsernameWithContact(ctx context.Context, username string) (GetUserByUsernameWithContactRow, error)
+	GetUserPermissionMatrix(ctx context.Context, entityID uuid.UUID) ([]GetUserPermissionMatrixRow, error)
+	GetUserPermissionSummary(ctx context.Context, entityID uuid.UUID) ([]GetUserPermissionSummaryRow, error)
+	GetUserPermissionSummaryByType(ctx context.Context, entityID uuid.UUID) ([]GetUserPermissionSummaryByTypeRow, error)
+	GetUserPermissions(ctx context.Context, entityID uuid.UUID) ([]Acl, error)
+	GetUserRoles(ctx context.Context, entityID uuid.UUID) ([]AclRole, error)
+	GetUserStats(ctx context.Context) (GetUserStatsRow, error)
+	GetUserWithContact(ctx context.Context, id uuid.UUID) (GetUserWithContactRow, error)
+	GetUsersByPermission(ctx context.Context, arg GetUsersByPermissionParams) ([]User, error)
+	GetUsersByRoleWithContacts(ctx context.Context, name string) ([]GetUsersByRoleWithContactsRow, error)
+	GetUsersWithContacts(ctx context.Context) ([]GetUsersWithContactsRow, error)
 	HardDeleteActivity(ctx context.Context, id uuid.UUID) error
 	HardDeleteActivityContact(ctx context.Context, id uuid.UUID) error
 	HardDeleteCampaignActivity(ctx context.Context, id uuid.UUID) error
@@ -484,6 +554,12 @@ type Querier interface {
 	HardDeleteCampaignEvent(ctx context.Context, id uuid.UUID) error
 	HardDeleteCase(ctx context.Context, id uuid.UUID) error
 	HardDeleteCaseActivity(ctx context.Context, id uuid.UUID) error
+	ListACLEntityRolesByEntity(ctx context.Context, arg ListACLEntityRolesByEntityParams) ([]AclEntityRole, error)
+	ListACLEntityRolesByRole(ctx context.Context, aclRoleID uuid.UUID) ([]AclEntityRole, error)
+	ListACLRoles(ctx context.Context) ([]AclRole, error)
+	ListACLsByEntity(ctx context.Context, arg ListACLsByEntityParams) ([]Acl, error)
+	ListACLsByOperation(ctx context.Context, operation string) ([]Acl, error)
+	ListACLsByRole(ctx context.Context, entityID uuid.NullUUID) ([]Acl, error)
 	ListActiveActivityTypes(ctx context.Context) ([]ActivityType, error)
 	ListActiveCampaignContacts(ctx context.Context) ([]CampaignContact, error)
 	ListActiveCampaignGroups(ctx context.Context) ([]CampaignGroup, error)
@@ -643,12 +719,17 @@ type Querier interface {
 	ListTargetActivityTypes(ctx context.Context) ([]ActivityType, error)
 	ListTestParticipants(ctx context.Context, isTest sql.NullBool) ([]Participant, error)
 	ListTestSurveyResponses(ctx context.Context, isTest sql.NullBool) ([]SurveyResponse, error)
+	ListUFMatches(ctx context.Context) ([]UfMatch, error)
 	ListUpcomingEvents(ctx context.Context, arg ListUpcomingEventsParams) ([]Event, error)
+	ListUsers(ctx context.Context) ([]User, error)
+	ListUsersByRole(ctx context.Context, name string) ([]User, error)
 	MarkReportResultCompleted(ctx context.Context, id uuid.UUID) error
 	MarkReportResultFailed(ctx context.Context, arg MarkReportResultFailedParams) error
 	MarkSurveyResponseAbandoned(ctx context.Context, id uuid.UUID) error
 	MarkSurveyResponseCompleted(ctx context.Context, id uuid.UUID) error
 	MarkSurveyResponsePartial(ctx context.Context, id uuid.UUID) error
+	RemoveUserFromRole(ctx context.Context, arg RemoveUserFromRoleParams) error
+	SearchACLs(ctx context.Context, arg SearchACLsParams) ([]Acl, error)
 	SearchActivities(ctx context.Context, subject sql.NullString) ([]Activity, error)
 	SearchActivityContacts(ctx context.Context, role sql.NullString) ([]ActivityContact, error)
 	SearchActivityTypes(ctx context.Context, name string) ([]ActivityType, error)
@@ -697,8 +778,15 @@ type Querier interface {
 	SearchSurveys(ctx context.Context, title string) ([]Survey, error)
 	SearchTagSets(ctx context.Context, arg SearchTagSetsParams) ([]TagSet, error)
 	SearchTags(ctx context.Context, arg SearchTagsParams) ([]Tag, error)
+	SearchUserAccessibleContacts(ctx context.Context, arg SearchUserAccessibleContactsParams) ([]Contact, error)
+	SearchUserAccessibleEvents(ctx context.Context, arg SearchUserAccessibleEventsParams) ([]Event, error)
+	SearchUserAccessibleGroups(ctx context.Context, arg SearchUserAccessibleGroupsParams) ([]Group, error)
+	SearchUsers(ctx context.Context, arg SearchUsersParams) ([]User, error)
 	SetDefaultDashboard(ctx context.Context) error
 	SetDefaultSurvey(ctx context.Context) error
+	UpdateACL(ctx context.Context, arg UpdateACLParams) (Acl, error)
+	UpdateACLEntityRole(ctx context.Context, arg UpdateACLEntityRoleParams) (AclEntityRole, error)
+	UpdateACLRole(ctx context.Context, arg UpdateACLRoleParams) (AclRole, error)
 	UpdateActivity(ctx context.Context, arg UpdateActivityParams) (Activity, error)
 	UpdateActivityContact(ctx context.Context, arg UpdateActivityContactParams) (ActivityContact, error)
 	UpdateActivityType(ctx context.Context, arg UpdateActivityTypeParams) (ActivityType, error)
@@ -779,6 +867,10 @@ type Querier interface {
 	UpdateTagSet(ctx context.Context, arg UpdateTagSetParams) (TagSet, error)
 	UpdateTagSetWeight(ctx context.Context, arg UpdateTagSetWeightParams) error
 	UpdateTagWeight(ctx context.Context, arg UpdateTagWeightParams) error
+	UpdateUFMatch(ctx context.Context, arg UpdateUFMatchParams) (UfMatch, error)
+	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
+	UpdateUserLastLogin(ctx context.Context, id uuid.UUID) (User, error)
+	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)
