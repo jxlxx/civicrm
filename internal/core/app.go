@@ -20,6 +20,7 @@ import (
 // App represents the main CiviCRM application
 type App struct {
 	Config     *config.Config
+	Container  *Container
 	Logger     *logger.Logger
 	DB         *database.Database
 	Cache      *cache.Manager
@@ -35,8 +36,9 @@ func NewApp() (*App, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	app := &App{
-		ctx:    ctx,
-		cancel: cancel,
+		ctx:       ctx,
+		cancel:    cancel,
+		Container: NewContainer(),
 	}
 
 	if err := app.initialize(); err != nil {
@@ -56,34 +58,37 @@ func (app *App) initialize() error {
 	}
 
 	// Initialize logger
-	if app.Logger, err = logger.New(app.Config.Logging); err != nil {
+	if app.Logger, err = logger.New(&app.Config.Logging); err != nil {
 		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
 
 	// Initialize database
-	if app.DB, err = database.New(app.Config.Database); err != nil {
+	if app.DB, err = database.New(&app.Config.Database); err != nil {
 		return fmt.Errorf("failed to initialize database: %w", err)
 	}
 
 	// Initialize cache
-	if app.Cache, err = cache.New(app.Config.Cache); err != nil {
+	if app.Cache, err = cache.New(&app.Config.Cache); err != nil {
 		return fmt.Errorf("failed to initialize cache: %w", err)
 	}
 
 	// Initialize security manager
-	if app.Security, err = security.New(app.Config.Security); err != nil {
+	if app.Security, err = security.New(&app.Config.Security); err != nil {
 		return fmt.Errorf("failed to initialize security: %w", err)
 	}
 
 	// Initialize extension manager
-	if app.Extensions, err = extensions.New(app.Config.Extensions, app.Logger); err != nil {
+	if app.Extensions, err = extensions.New(&app.Config.Extensions, app.Logger); err != nil {
 		return fmt.Errorf("failed to initialize extensions: %w", err)
 	}
 
 	// Initialize API server
-	if app.API, err = api.New(app.Config.API, app.Logger, app.DB, app.Cache, app.Security, app.Extensions); err != nil {
+	if app.API, err = api.New(&app.Config.API, app.Logger, app.DB, app.Cache, app.Security, app.Extensions); err != nil {
 		return fmt.Errorf("failed to initialize API: %w", err)
 	}
+
+	// Register services in the container
+	app.registerServices()
 
 	app.Logger.Info("Application initialized successfully")
 	return nil
@@ -155,9 +160,19 @@ func (app *App) Context() context.Context {
 	return app.ctx
 }
 
+// registerServices registers all services in the dependency injection container
+func (app *App) registerServices() {
+	// Register core services as singletons
+	app.Container.RegisterInstance((*config.Config)(nil), app.Config)
+	app.Container.RegisterInstance((*logger.Logger)(nil), app.Logger)
+	app.Container.RegisterInstance((*database.Database)(nil), app.DB)
+	app.Container.RegisterInstance((*cache.Manager)(nil), app.Cache)
+	app.Container.RegisterInstance((*security.Manager)(nil), app.Security)
+	app.Container.RegisterInstance((*extensions.Manager)(nil), app.Extensions)
+	app.Container.RegisterInstance((*api.Server)(nil), app.API)
+}
+
 // GetService retrieves a service from the application
-func (app *App) GetService(name string) (interface{}, bool) {
-	// This would be implemented with a proper service container
-	// For now, return nil
-	return nil, false
+func (app *App) GetService(serviceType interface{}) (interface{}, error) {
+	return app.Container.Get(serviceType)
 }
