@@ -1,0 +1,16 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "CiviCRM PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "civicrm",
+      "Username": "civicrm",
+      "Password": "civicrm_dev_password",
+      "SSLMode": "prefer",
+      "PassFile": "/tmp/pgpassfile",
+      "Comment": "CiviCRM development database"
+    }
+  }
+}

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL database
   postgres:
@@ -14,7 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d
+      #- ./migrations:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U civicrm -d civicrm"]
       interval: 10s
@@ -46,14 +44,18 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@civicrm.dev
       PGADMIN_DEFAULT_PASSWORD: admin_password
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/servers.json
     ports:
       - "8081:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./config/pgadmin-servers.json:/pgadmin4/servers.json:ro
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    profiles:
+      - tools
 
 
 volumes:

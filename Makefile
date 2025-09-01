@@ -32,14 +32,14 @@ install-tern:
 # Start development services
 up:
 	@echo "Starting development services..."
-	docker compose up -d
+	docker compose --profile tools up -d
 	@echo "Services started. PostgreSQL on port 5432, Redis on port 6379"
 	@echo "pgAdmin available at http://localhost:8081 (admin@civicrm.dev / admin_password)"
 
 # Stop development services
 down:
 	@echo "Stopping development services..."
-	docker compose down
+	docker compose --profile tools down
 	@echo "Services stopped"
 
 # Show development service logs
@@ -50,18 +50,14 @@ logs:
 # Run database migrations
 migrate:
 	@echo "Running database migrations..."
-	@if [ -f config/config.yaml ]; then \
-		export PGHOST=localhost; \
-		export PGPORT=5432; \
-		export PGDATABASE=civicrm; \
-		export PGUSER=civicrm; \
-		export PGPASSWORD=civicrm_dev_password; \
-		export PGSSLMODE=disable; \
-		tern migrate -c tern.conf --migrations migrations; \
-	else \
-		echo "No config.yaml found. Please run 'make dev-setup' first."; \
-		exit 1; \
-	fi
+	export PGHOST=localhost; 
+	export PGPORT=5432; 
+	export PGDATABASE=civicrm; 
+	export PGUSER=civicrm; 
+	export PGPASSWORD=civicrm_dev_password; 
+	export PGSSLMODE=disable; 
+	tern migrate -c tern.conf --migrations migrations; 
+
 
 # Create new migration file
 migrate-new:
@@ -88,13 +84,13 @@ migrate-rollback:
 # Show migration status
 migrate-status:
 	@echo "Migration status:"
-	export PGHOST=localhost; \
+	@export PGHOST=localhost; \
 	export PGPORT=5432; \
 	export PGDATABASE=civicrm; \
 	export PGUSER=civicrm; \
 	export PGPASSWORD=civicrm_dev_password; \
 	export PGSSLMODE=disable; \
-	tern migrate -c tern.conf --migrations migrations --dry-run
+	tern migrate -c tern.conf --migrations migrations --destination 0 || true
 
 # Build the application
 build:
@@ -120,7 +116,7 @@ clean:
 	go clean
 	@echo "Cleaning Docker resources..."
 	@if docker compose ps -q > /dev/null 2>&1; then \
-		docker compose down -v --remove-orphans; \
+		docker compose --profile tools down -v --remove-orphans; \
 		echo "Docker containers, volumes, and networks removed"; \
 	else \
 		echo "No Docker containers running"; \
