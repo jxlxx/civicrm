@@ -148,3 +148,52 @@ INSERT INTO relationship_types (name_a_b, name_b_a, description, contact_type_a,
     ('Board Member of', 'Has Board Member', 'Board membership', 'Individual', 'Organization'),
     ('Partner of', 'Partner of', 'Partnership relationship', 'Individual', 'Individual'),
     ('Sibling of', 'Sibling of', 'Sibling relationship', 'Individual', 'Individual');
+
+-- ACL System Seed Data
+-- Basic roles for the permission system
+
+-- Create basic ACL roles
+INSERT INTO acl_roles (name, label, description) VALUES
+    ('administrator', 'Administrator', 'Full system access with all permissions'),
+    ('user', 'User', 'Standard user with basic permissions'),
+    ('everyone', 'Everyone', 'Anonymous user permissions'),
+    ('authenticated', 'Authenticated User', 'Logged-in user permissions');
+
+-- Create basic ACL rules for administrators (full access)
+INSERT INTO acls (name, deny, entity_table, entity_id, operation, object_table, object_id, priority) VALUES
+    ('Admin View All Contacts', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'administrator'), 'View', 'contacts', NULL, 1),
+    ('Admin Edit All Contacts', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'administrator'), 'Edit', 'contacts', NULL, 1),
+    ('Admin Delete All Contacts', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'administrator'), 'Delete', 'contacts', NULL, 1),
+    ('Admin View All Groups', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'administrator'), 'View', 'groups', NULL, 1),
+    ('Admin Edit All Groups', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'administrator'), 'Edit', 'groups', NULL, 1),
+    ('Admin View All Events', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'administrator'), 'View', 'events', NULL, 1),
+    ('Admin Edit All Events', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'administrator'), 'Edit', 'events', NULL, 1);
+
+-- Create basic ACL rules for authenticated users (limited access)
+INSERT INTO acls (name, deny, entity_table, entity_id, operation, object_table, object_id, priority) VALUES
+    ('User View Own Contact', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'authenticated'), 'View', 'contacts', NULL, 10),
+    ('User Edit Own Contact', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'authenticated'), 'Edit', 'contacts', NULL, 10),
+    ('User View Public Events', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'authenticated'), 'View', 'events', NULL, 10),
+    ('User View Public Groups', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'authenticated'), 'View', 'groups', NULL, 10);
+
+-- Create basic ACL rules for everyone (anonymous access)
+INSERT INTO acls (name, deny, entity_table, entity_id, operation, object_table, object_id, priority) VALUES
+    ('Public View Public Events', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'everyone'), 'View', 'events', NULL, 100),
+    ('Public View Public Groups', FALSE, 'acl_roles', (SELECT id FROM acl_roles WHERE name = 'everyone'), 'View', 'groups', NULL, 100);
+
+-- Create default admin user
+-- Note: In production, you should change this password!
+INSERT INTO users (username, email, hashed_password, is_admin) VALUES
+    ('admin', 'admin@example.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', TRUE); -- password: password
+
+-- Create admin contact and link to user
+INSERT INTO contacts (contact_type, first_name, last_name, email, is_active) VALUES
+    ('Individual', 'System', 'Administrator', 'admin@example.com', TRUE);
+
+-- Link admin user to admin contact via uf_match
+INSERT INTO uf_match (uf_id, uf_name, contact_id) VALUES
+    ((SELECT id FROM users WHERE username = 'admin'), 'admin', (SELECT id FROM contacts WHERE email = 'admin@example.com'));
+
+-- Assign admin user to administrator role
+INSERT INTO acl_entity_roles (acl_role_id, entity_table, entity_id) VALUES
+    ((SELECT id FROM acl_roles WHERE name = 'administrator'), 'users', (SELECT id FROM users WHERE username = 'admin'));

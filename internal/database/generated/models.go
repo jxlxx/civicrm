@@ -12,6 +12,59 @@ import (
 	"github.com/sqlc-dev/pqtype"
 )
 
+type Acl struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	Deny        bool           `json:"deny"`
+	EntityTable string         `json:"entity_table"`
+	EntityID    uuid.NullUUID  `json:"entity_id"`
+	Operation   string         `json:"operation"`
+	ObjectTable sql.NullString `json:"object_table"`
+	ObjectID    uuid.NullUUID  `json:"object_id"`
+	AclTable    sql.NullString `json:"acl_table"`
+	AclID       uuid.NullUUID  `json:"acl_id"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	Priority    sql.NullInt32  `json:"priority"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+type AclCache struct {
+	ID           uuid.UUID     `json:"id"`
+	ContactID    uuid.NullUUID `json:"contact_id"`
+	AclID        uuid.UUID     `json:"acl_id"`
+	ModifiedDate sql.NullTime  `json:"modified_date"`
+}
+
+type AclContactCache struct {
+	ID        uuid.UUID     `json:"id"`
+	UserID    uuid.NullUUID `json:"user_id"`
+	ContactID uuid.UUID     `json:"contact_id"`
+	Operation string        `json:"operation"`
+	DomainID  uuid.UUID     `json:"domain_id"`
+	CreatedAt sql.NullTime  `json:"created_at"`
+}
+
+type AclEntityRole struct {
+	ID          uuid.UUID    `json:"id"`
+	AclRoleID   uuid.UUID    `json:"acl_role_id"`
+	EntityTable string       `json:"entity_table"`
+	EntityID    uuid.UUID    `json:"entity_id"`
+	IsActive    sql.NullBool `json:"is_active"`
+	CreatedAt   sql.NullTime `json:"created_at"`
+	UpdatedAt   sql.NullTime `json:"updated_at"`
+}
+
+type AclRole struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	Label       string         `json:"label"`
+	Description sql.NullString `json:"description"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
 type Activity struct {
 	ID                uuid.UUID      `json:"id"`
 	ActivityTypeID    uuid.UUID      `json:"activity_type_id"`
