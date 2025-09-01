@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"sort"
 	"time"
@@ -154,8 +153,8 @@ func (mm *MigrationManager) ApplyMigration(ctx context.Context, migration Migrat
 	}
 
 	mm.logger.Info("Migration applied successfully",
-		logger.Int64("version", migration.Version),
-		logger.String("name", migration.Name),
+		"version", migration.Version,
+		"name", migration.Name,
 	)
 
 	return nil
@@ -194,8 +193,8 @@ func (mm *MigrationManager) RollbackMigration(ctx context.Context, version int64
 	}
 
 	mm.logger.Info("Migration rolled back successfully",
-		logger.Int64("version", version),
-		logger.String("name", name),
+		"version", version,
+		"name", name,
 	)
 
 	return nil
@@ -220,14 +219,14 @@ func (mm *MigrationManager) Migrate(ctx context.Context, availableMigrations []M
 	}
 
 	mm.logger.Info("Starting migration process",
-		logger.Int("pending_count", len(pendingMigrations)),
+		"pending_count", len(pendingMigrations),
 	)
 
 	// Apply each pending migration
 	for _, migration := range pendingMigrations {
 		mm.logger.Info("Applying migration",
-			logger.Int64("version", migration.Version),
-			logger.String("name", migration.Name),
+			"version", migration.Version,
+			"name", migration.Name,
 		)
 
 		if err := mm.ApplyMigration(ctx, migration); err != nil {
@@ -236,7 +235,7 @@ func (mm *MigrationManager) Migrate(ctx context.Context, availableMigrations []M
 	}
 
 	mm.logger.Info("Migration process completed successfully",
-		logger.Int("migrations_applied", len(pendingMigrations)),
+		"migrations_applied", len(pendingMigrations),
 	)
 
 	return nil
@@ -261,21 +260,21 @@ func (mm *MigrationManager) GetMigrationStatus(ctx context.Context, availableMig
 	}
 
 	return &MigrationStatus{
-		CurrentVersion:     latestVersion,
-		AppliedCount:       len(appliedMigrations),
-		PendingCount:       len(pendingMigrations),
-		TotalAvailable:     len(availableMigrations),
-		AppliedMigrations:  appliedMigrations,
-		PendingMigrations:  pendingMigrations,
+		CurrentVersion:    latestVersion,
+		AppliedCount:      len(appliedMigrations),
+		PendingCount:      len(pendingMigrations),
+		TotalAvailable:    len(availableMigrations),
+		AppliedMigrations: appliedMigrations,
+		PendingMigrations: pendingMigrations,
 	}, nil
 }
 
 // MigrationStatus represents the current migration status
 type MigrationStatus struct {
-	CurrentVersion     int64       `json:"current_version"`
-	AppliedCount       int        `json:"applied_count"`
-	PendingCount       int        `json:"pending_count"`
-	TotalAvailable     int        `json:"total_available"`
-	AppliedMigrations  []Migration `json:"applied_migrations"`
-	PendingMigrations  []Migration `json:"pending_migrations"`
+	CurrentVersion    int64       `json:"current_version"`
+	AppliedCount      int         `json:"applied_count"`
+	PendingCount      int         `json:"pending_count"`
+	TotalAvailable    int         `json:"total_available"`
+	AppliedMigrations []Migration `json:"applied_migrations"`
+	PendingMigrations []Migration `json:"pending_migrations"`
 }

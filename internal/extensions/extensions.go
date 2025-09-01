@@ -77,10 +77,10 @@ func (m *Manager) Start() error {
 
 	for name, extension := range m.extensions {
 		if err := extension.Start(m.ctx); err != nil {
-			m.logger.Error("Failed to start extension", logger.String("extension", name), logger.Error(err))
+			m.logger.Error("Failed to start extension", "extension", name, "error", err)
 			continue
 		}
-		m.logger.Info("Extension started", logger.String("extension", name))
+		m.logger.Info("Extension started", "extension", name)
 	}
 
 	return nil
@@ -93,10 +93,10 @@ func (m *Manager) Stop() error {
 
 	for name, extension := range m.extensions {
 		if err := extension.Stop(m.ctx); err != nil {
-			m.logger.Error("Failed to stop extension", logger.String("extension", name), logger.Error(err))
+			m.logger.Error("Failed to stop extension", "extension", name, "error", err)
 			continue
 		}
-		m.logger.Info("Extension stopped", logger.String("extension", name))
+		m.logger.Info("Extension stopped", "extension", name)
 	}
 
 	m.cancel()
@@ -133,7 +133,7 @@ func (m *Manager) RegisterExtension(extension Extension) error {
 	}
 
 	m.extensions[name] = extension
-	m.logger.Info("Extension registered", logger.String("extension", name))
+	m.logger.Info("Extension registered", "extension", name)
 
 	return nil
 }
@@ -150,14 +150,15 @@ func (m *Manager) UnregisterExtension(name string) error {
 
 	// Stop extension
 	if err := extension.Stop(m.ctx); err != nil {
-		m.logger.Error("Failed to stop extension during unregistration", logger.String("extension", name), logger.Error(err))
+		m.logger.Error("Failed to stop extension during unregistration", "extension", name, "error", err)
 	}
 
 	// Remove hooks
 	for _, hook := range extension.RegisterHooks() {
 		if hooks, exists := m.hooks[hook.Name]; exists {
 			for i, h := range hooks {
-				if h.Handler == hook.Handler {
+				// Compare hook names instead of function pointers
+				if h.Name == hook.Name {
 					m.hooks[hook.Name] = append(hooks[:i], hooks[i+1:]...)
 					break
 				}
@@ -171,7 +172,7 @@ func (m *Manager) UnregisterExtension(name string) error {
 	}
 
 	delete(m.extensions, name)
-	m.logger.Info("Extension unregistered", logger.String("extension", name))
+	m.logger.Info("Extension unregistered", "extension", name)
 
 	return nil
 }
@@ -211,7 +212,7 @@ func (m *Manager) ExecuteHook(ctx context.Context, hookName string, data interfa
 	result := data
 	for _, hook := range hooks {
 		if hookResult, err := hook.Handler(ctx, result); err != nil {
-			m.logger.Error("Hook execution failed", logger.String("hook", hookName), logger.String("extension", hook.Name), logger.Error(err))
+			m.logger.Error("Hook execution failed", "hook", hookName, "extension", hook.Name, "error", err)
 			continue
 		} else {
 			result = hookResult

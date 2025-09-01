@@ -14,7 +14,6 @@ import (
 	"github.com/jxlxx/civicrm/internal/extensions"
 	"github.com/jxlxx/civicrm/internal/logger"
 	"github.com/jxlxx/civicrm/internal/security"
-	"go.uber.org/zap"
 )
 
 // App represents the main CiviCRM application
@@ -118,22 +117,22 @@ func (app *App) Stop() error {
 
 	// Stop API server
 	if err := app.API.Stop(); err != nil {
-		app.Logger.Error("Failed to stop API server", zap.Error(err))
+		app.Logger.Error("Failed to stop API server", "error", err)
 	}
 
 	// Stop extension manager
 	if err := app.Extensions.Stop(); err != nil {
-		app.Logger.Error("Failed to stop extensions", zap.Error(err))
+		app.Logger.Error("Failed to stop extensions", "error", err)
 	}
 
 	// Close database connections
 	if err := app.DB.Close(); err != nil {
-		app.Logger.Error("Failed to close database", zap.Error(err))
+		app.Logger.Error("Failed to close database", "error", err)
 	}
 
 	// Close cache connections
 	if err := app.Cache.Close(); err != nil {
-		app.Logger.Error("Failed to close cache", zap.Error(err))
+		app.Logger.Error("Failed to close cache", "error", err)
 	}
 
 	app.cancel()

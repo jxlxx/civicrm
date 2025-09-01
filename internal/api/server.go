@@ -90,11 +90,11 @@ func (s *Server) setupRouter() error {
 
 // Start starts the API server
 func (s *Server) Start() error {
-	s.logger.Info("Starting API server", logger.String("address", s.server.Addr))
+	s.logger.Info("Starting API server", "address", s.server.Addr)
 
 	go func() {
 		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			s.logger.Error("API server failed", logger.Error(err))
+			s.logger.Error("API server failed", "error", err)
 		}
 	}()
 
@@ -115,11 +115,11 @@ func (s *Server) Stop() error {
 func (s *Server) loggingMiddleware() gin.HandlerFunc {
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		s.logger.Info("HTTP Request",
-			logger.String("method", param.Method),
-			logger.String("path", param.Path),
-			logger.Int("status", param.StatusCode),
-			logger.Duration("latency", param.Latency),
-			logger.String("client_ip", param.ClientIP),
+			"method", param.Method,
+			"path", param.Path,
+			"status", param.StatusCode,
+			"latency", param.Latency,
+			"client_ip", param.ClientIP,
 		)
 		return ""
 	})

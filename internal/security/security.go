@@ -157,8 +157,6 @@ func (m *Manager) CheckPermission(ctx context.Context, user *User, resource stri
 	}
 
 	// Check specific resource permissions
-	permission := fmt.Sprintf("%s:%s", resource, action)
-
 	// This is a simplified example - you'd typically have a permission matrix
 	allowedPermissions := map[string][]string{
 		"contact": {"read", "create", "update", "delete"},

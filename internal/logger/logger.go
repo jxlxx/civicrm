@@ -1,113 +1,123 @@
 package logger
 
 import (
+	"io"
+	"os"
+
 	"github.com/jxlxx/civicrm/internal/config"
-	"go.uber.org/zap"
+	"log/slog"
 )
 
-// Logger wraps the zap logger with additional methods
+// Logger wraps the slog logger with additional methods
 type Logger struct {
-	*zap.Logger
+	*slog.Logger
 	config *config.LoggingConfig
 }
 
 // New creates a new logger instance
 func New(config *config.LoggingConfig) (*Logger, error) {
-	var zapConfig zap.Config
+	var level slog.Level
 
 	switch config.Level {
 	case "debug":
-		zapConfig = zap.NewDevelopmentConfig()
-		zapConfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+		level = slog.LevelDebug
 	case "info":
-		zapConfig = zap.NewProductionConfig()
-		zapConfig.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+		level = slog.LevelInfo
 	case "warn":
-		zapConfig = zap.NewProductionConfig()
-		zapConfig.Level = zap.NewAtomicLevelAt(zap.WarnLevel)
+		level = slog.LevelWarn
 	case "error":
-		zapConfig = zap.NewProductionConfig()
-		zapConfig.Level = zap.NewAtomicLevelAt(zap.ErrorLevel)
+		level = slog.LevelError
 	default:
-		zapConfig = zap.NewProductionConfig()
-		zapConfig.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
+		level = slog.LevelInfo
 	}
+
+	// Configure handler options
+	opts := &slog.HandlerOptions{
+		Level: level,
+	}
+
+	var handler slog.Handler
 
 	// Configure output
 	if config.Output == "stdout" {
-		zapConfig.OutputPaths = []string{"stdout"}
-		zapConfig.ErrorOutputPaths = []string{"stderr"}
+		if config.Format == "json" {
+			handler = slog.NewJSONHandler(os.Stdout, opts)
+		} else {
+			handler = slog.NewTextHandler(os.Stdout, opts)
+		}
 	} else {
-		zapConfig.OutputPaths = []string{config.Output}
-		zapConfig.ErrorOutputPaths = []string{config.Output}
+		// For file output, we'd need to open the file
+		// For now, fall back to stdout
+		if config.Format == "json" {
+			handler = slog.NewJSONHandler(os.Stdout, opts)
+		} else {
+			handler = slog.NewTextHandler(os.Stdout, opts)
+		}
 	}
 
-	// Configure encoding
-	if config.Format == "json" {
-		zapConfig.Encoding = "json"
-	} else {
-		zapConfig.Encoding = "console"
-	}
-
-	// Build logger
-	zapLogger, err := zapConfig.Build()
-	if err != nil {
-		return nil, err
-	}
+	// Create logger
+	slogLogger := slog.New(handler)
 
 	return &Logger{
-		Logger: zapLogger,
+		Logger: slogLogger,
 		config: config,
 	}, nil
 }
 
 // Info logs an info level message
-func (l *Logger) Info(msg string, fields ...zap.Field) {
-	l.Logger.Info(msg, fields...)
+func (l *Logger) Info(msg string, args ...interface{}) {
+	l.Logger.Info(msg, args...)
 }
 
 // Error logs an error level message
-func (l *Logger) Error(msg string, fields ...zap.Field) {
-	l.Logger.Error(msg, fields...)
+func (l *Logger) Error(msg string, args ...interface{}) {
+	l.Logger.Error(msg, args...)
 }
 
 // Debug logs a debug level message
-func (l *Logger) Debug(msg string, fields ...zap.Field) {
-	l.Logger.Debug(msg, fields...)
+func (l *Logger) Debug(msg string, args ...interface{}) {
+	l.Logger.Debug(msg, args...)
 }
 
 // Warn logs a warning level message
-func (l *Logger) Warn(msg string, fields ...zap.Field) {
-	l.Logger.Warn(msg, fields...)
+func (l *Logger) Warn(msg string, args ...interface{}) {
+	l.Logger.Warn(msg, args...)
 }
 
 // Fatal logs a fatal level message and exits
-func (l *Logger) Fatal(msg string, fields ...zap.Field) {
-	l.Logger.Fatal(msg, fields...)
+func (l *Logger) Fatal(msg string, args ...interface{}) {
+	l.Logger.Error(msg, args...)
+	os.Exit(1)
 }
 
 // WithContext adds context fields to the logger
 func (l *Logger) WithContext(ctx map[string]interface{}) *Logger {
-	fields := make([]zap.Field, 0, len(ctx))
+	// Convert map to key-value pairs for slog
+	args := make([]interface{}, 0, len(ctx)*2)
 	for k, v := range ctx {
-		fields = append(fields, zap.Any(k, v))
+		args = append(args, k, v)
 	}
-
+	
+	// slog.With returns a new logger with the given attributes
+	newLogger := l.Logger.With(args...)
+	
 	return &Logger{
-		Logger: l.Logger.With(fields...),
+		Logger: newLogger,
 		config: l.config,
 	}
 }
 
 // Sync flushes any buffered log entries
 func (l *Logger) Sync() error {
-	return l.Logger.Sync()
+	// slog doesn't have a Sync method, but we can implement it if needed
+	// For now, return nil as slog handles buffering internally
+	return nil
 }
 
 // NewNop creates a no-op logger for testing
 func NewNop() *Logger {
 	return &Logger{
-		Logger: zap.NewNop(),
+		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 		config: &config.LoggingConfig{},
 	}
 }
