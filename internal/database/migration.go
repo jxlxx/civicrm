@@ -125,7 +125,9 @@ func (mm *MigrationManager) ApplyMigration(ctx context.Context, migration Migrat
 	// Execute migration SQL
 	_, err = tx.ExecContext(ctx, migration.SQL)
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			return fmt.Errorf("failed to execute migration %s: %w, and failed to rollback: %w", migration.Name, err, rollbackErr)
+		}
 		return fmt.Errorf("failed to execute migration %s: %w", migration.Name, err)
 	}
 
@@ -143,7 +145,9 @@ func (mm *MigrationManager) ApplyMigration(ctx context.Context, migration Migrat
 		time.Now(),
 	)
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			return fmt.Errorf("failed to record migration %s: %w, and failed to rollback: %w", migration.Name, err, rollbackErr)
+		}
 		return fmt.Errorf("failed to record migration %s: %w", migration.Name, err)
 	}
 
@@ -183,7 +187,9 @@ func (mm *MigrationManager) RollbackMigration(ctx context.Context, version int64
 	deleteSQL := `DELETE FROM migrations WHERE version = $1`
 	_, err = tx.ExecContext(ctx, deleteSQL, version)
 	if err != nil {
-		tx.Rollback()
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			return fmt.Errorf("failed to rollback migration %d: %w, and failed to rollback: %w", version, err, rollbackErr)
+		}
 		return fmt.Errorf("failed to rollback migration %d: %w", version, err)
 	}
 

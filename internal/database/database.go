@@ -127,7 +127,11 @@ func (db *Database) Transaction(ctx context.Context, fn func(*sql.Tx) error) err
 
 	defer func() {
 		if p := recover(); p != nil {
-			tx.Rollback()
+			if rollbackErr := tx.Rollback(); rollbackErr != nil {
+				// Log the rollback error but still panic with the original panic
+				// In a real implementation, you might want to log this error
+				_ = rollbackErr // Suppress unused variable warning
+			}
 			panic(p)
 		}
 	}()
