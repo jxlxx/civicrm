@@ -1,0 +1,59 @@
+# CiviCRM Go Configuration Example
+# Copy this file to config.yaml and customize for your environment
+
+database:
+  driver: "postgres"  # postgres, mysql
+  host: "localhost"
+  port: 5432
+  username: "civicrm"
+  password: "password"
+  database: "civicrm"
+  ssl_mode: "disable"
+  max_connections: 10
+  timeout: "30s"
+
+cache:
+  driver: "memory"  # memory, redis
+  host: "localhost"
+  port: 6379
+  password: ""
+  database: 0
+  ttl: "1h"
+  max_memory: 104857600  # 100MB
+  max_entries: 10000
+
+security:
+  jwt_secret: ""  # Will be auto-generated if empty
+  jwt_expiration: "24h"
+  bcrypt_cost: 12
+  session_timeout: "30m"
+  max_login_attempts: 5
+  lockout_duration: "15m"
+
+api:
+  port: 8080
+  host: "0.0.0.0"
+  read_timeout: "30s"
+  write_timeout: "30s"
+  idle_timeout: "60s"
+  cors:
+    allowed_origins: ["*"]
+    allowed_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allowed_headers: ["*"]
+    allow_credentials: true
+    max_age: 86400
+
+logging:
+  level: "info"  # debug, info, warn, error
+  format: "json"  # json, console
+  output: "stdout"
+  max_size: 100
+  max_backups: 3
+  max_age: 28
+  compress: true
+
+extensions:
+  path: "./extensions"
+  auto_load: true
+  disabled: []
+  development: false
