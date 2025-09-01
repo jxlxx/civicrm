@@ -337,6 +337,33 @@ type Country struct {
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
 }
 
+type Dashboard struct {
+	ID          uuid.UUID             `json:"id"`
+	Name        string                `json:"name"`
+	Description sql.NullString        `json:"description"`
+	Layout      pqtype.NullRawMessage `json:"layout"`
+	IsActive    sql.NullBool          `json:"is_active"`
+	IsDefault   sql.NullBool          `json:"is_default"`
+	CreatedBy   uuid.NullUUID         `json:"created_by"`
+	CreatedAt   sql.NullTime          `json:"created_at"`
+	UpdatedAt   sql.NullTime          `json:"updated_at"`
+}
+
+type DashboardWidget struct {
+	ID            uuid.UUID             `json:"id"`
+	DashboardID   uuid.UUID             `json:"dashboard_id"`
+	Name          string                `json:"name"`
+	WidgetType    string                `json:"widget_type"`
+	Configuration pqtype.NullRawMessage `json:"configuration"`
+	PositionX     sql.NullInt32         `json:"position_x"`
+	PositionY     sql.NullInt32         `json:"position_y"`
+	Width         sql.NullInt32         `json:"width"`
+	Height        sql.NullInt32         `json:"height"`
+	IsActive      sql.NullBool          `json:"is_active"`
+	CreatedAt     sql.NullTime          `json:"created_at"`
+	UpdatedAt     sql.NullTime          `json:"updated_at"`
+}
+
 type Discount struct {
 	ID             uuid.UUID      `json:"id"`
 	Name           string         `json:"name"`
@@ -771,6 +798,68 @@ type RelationshipType struct {
 	IsReserved   sql.NullBool   `json:"is_reserved"`
 	CreatedAt    sql.NullTime   `json:"created_at"`
 	UpdatedAt    sql.NullTime   `json:"updated_at"`
+}
+
+type ReportInstance struct {
+	ID               uuid.UUID             `json:"id"`
+	ReportTemplateID uuid.UUID             `json:"report_template_id"`
+	Name             string                `json:"name"`
+	Description      sql.NullString        `json:"description"`
+	Parameters       pqtype.NullRawMessage `json:"parameters"`
+	Schedule         sql.NullString        `json:"schedule"`
+	LastRun          sql.NullTime          `json:"last_run"`
+	NextRun          sql.NullTime          `json:"next_run"`
+	IsActive         sql.NullBool          `json:"is_active"`
+	CreatedBy        uuid.NullUUID         `json:"created_by"`
+	CreatedAt        sql.NullTime          `json:"created_at"`
+	UpdatedAt        sql.NullTime          `json:"updated_at"`
+}
+
+type ReportPermission struct {
+	ID               uuid.UUID     `json:"id"`
+	ReportTemplateID uuid.UUID     `json:"report_template_id"`
+	RoleID           uuid.NullUUID `json:"role_id"`
+	PermissionType   string        `json:"permission_type"`
+	IsActive         sql.NullBool  `json:"is_active"`
+	CreatedAt        sql.NullTime  `json:"created_at"`
+	UpdatedAt        sql.NullTime  `json:"updated_at"`
+}
+
+type ReportResult struct {
+	ID               uuid.UUID             `json:"id"`
+	ReportInstanceID uuid.UUID             `json:"report_instance_id"`
+	ExecutionDate    sql.NullTime          `json:"execution_date"`
+	ResultData       pqtype.NullRawMessage `json:"result_data"`
+	RowCount         sql.NullInt32         `json:"row_count"`
+	ExecutionTimeMs  sql.NullInt32         `json:"execution_time_ms"`
+	Status           sql.NullString        `json:"status"`
+	ErrorMessage     sql.NullString        `json:"error_message"`
+	CreatedAt        sql.NullTime          `json:"created_at"`
+}
+
+type ReportSubscription struct {
+	ID               uuid.UUID             `json:"id"`
+	ReportInstanceID uuid.UUID             `json:"report_instance_id"`
+	ContactID        uuid.UUID             `json:"contact_id"`
+	DeliveryMethod   string                `json:"delivery_method"`
+	DeliveryConfig   pqtype.NullRawMessage `json:"delivery_config"`
+	IsActive         sql.NullBool          `json:"is_active"`
+	CreatedAt        sql.NullTime          `json:"created_at"`
+	UpdatedAt        sql.NullTime          `json:"updated_at"`
+}
+
+type ReportTemplate struct {
+	ID            uuid.UUID             `json:"id"`
+	Name          string                `json:"name"`
+	Description   sql.NullString        `json:"description"`
+	ReportType    string                `json:"report_type"`
+	QueryTemplate string                `json:"query_template"`
+	Parameters    pqtype.NullRawMessage `json:"parameters"`
+	IsActive      sql.NullBool          `json:"is_active"`
+	IsSystem      sql.NullBool          `json:"is_system"`
+	CreatedBy     uuid.NullUUID         `json:"created_by"`
+	CreatedAt     sql.NullTime          `json:"created_at"`
+	UpdatedAt     sql.NullTime          `json:"updated_at"`
 }
 
 type StateProvince struct {

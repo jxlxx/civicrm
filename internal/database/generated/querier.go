@@ -20,8 +20,14 @@ type Querier interface {
 	ActivateCaseContact(ctx context.Context, id uuid.UUID) error
 	ActivateCaseStatus(ctx context.Context, id uuid.UUID) error
 	ActivateCaseType(ctx context.Context, id uuid.UUID) error
+	ActivateDashboard(ctx context.Context, id uuid.UUID) error
+	ActivateDashboardWidget(ctx context.Context, id uuid.UUID) error
 	ActivateMembershipStatus(ctx context.Context, id uuid.UUID) error
 	ActivateMembershipType(ctx context.Context, id uuid.UUID) error
+	ActivateReportInstance(ctx context.Context, id uuid.UUID) error
+	ActivateReportPermission(ctx context.Context, id uuid.UUID) error
+	ActivateReportSubscription(ctx context.Context, id uuid.UUID) error
+	ActivateReportTemplate(ctx context.Context, id uuid.UUID) error
 	ActivateSurvey(ctx context.Context, id uuid.UUID) error
 	ActivateSurveyCampaign(ctx context.Context, id uuid.UUID) error
 	ActivateSurveyGroup(ctx context.Context, id uuid.UUID) error
@@ -90,6 +96,8 @@ type Querier interface {
 	CreateCaseType(ctx context.Context, arg CreateCaseTypeParams) (CaseType, error)
 	CreateContact(ctx context.Context, arg CreateContactParams) (Contact, error)
 	CreateContribution(ctx context.Context, arg CreateContributionParams) (Contribution, error)
+	CreateDashboard(ctx context.Context, arg CreateDashboardParams) (Dashboard, error)
+	CreateDashboardWidget(ctx context.Context, arg CreateDashboardWidgetParams) (DashboardWidget, error)
 	CreateDiscount(ctx context.Context, arg CreateDiscountParams) (Discount, error)
 	CreateEntityTag(ctx context.Context, arg CreateEntityTagParams) (EntityTag, error)
 	CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error)
@@ -106,6 +114,11 @@ type Querier interface {
 	CreatePriceField(ctx context.Context, arg CreatePriceFieldParams) (PriceField, error)
 	CreatePriceFieldValue(ctx context.Context, arg CreatePriceFieldValueParams) (PriceFieldValue, error)
 	CreatePriceSet(ctx context.Context, arg CreatePriceSetParams) (PriceSet, error)
+	CreateReportInstance(ctx context.Context, arg CreateReportInstanceParams) (ReportInstance, error)
+	CreateReportPermission(ctx context.Context, arg CreateReportPermissionParams) (ReportPermission, error)
+	CreateReportResult(ctx context.Context, arg CreateReportResultParams) (ReportResult, error)
+	CreateReportSubscription(ctx context.Context, arg CreateReportSubscriptionParams) (ReportSubscription, error)
+	CreateReportTemplate(ctx context.Context, arg CreateReportTemplateParams) (ReportTemplate, error)
 	CreateSurvey(ctx context.Context, arg CreateSurveyParams) (Survey, error)
 	CreateSurveyCampaign(ctx context.Context, arg CreateSurveyCampaignParams) (SurveyCampaign, error)
 	CreateSurveyGroup(ctx context.Context, arg CreateSurveyGroupParams) (SurveyGroup, error)
@@ -122,8 +135,14 @@ type Querier interface {
 	DeactivateCaseContact(ctx context.Context, id uuid.UUID) error
 	DeactivateCaseStatus(ctx context.Context, id uuid.UUID) error
 	DeactivateCaseType(ctx context.Context, id uuid.UUID) error
+	DeactivateDashboard(ctx context.Context, id uuid.UUID) error
+	DeactivateDashboardWidget(ctx context.Context, id uuid.UUID) error
 	DeactivateMembershipStatus(ctx context.Context, id uuid.UUID) error
 	DeactivateMembershipType(ctx context.Context, id uuid.UUID) error
+	DeactivateReportInstance(ctx context.Context, id uuid.UUID) error
+	DeactivateReportPermission(ctx context.Context, id uuid.UUID) error
+	DeactivateReportSubscription(ctx context.Context, id uuid.UUID) error
+	DeactivateReportTemplate(ctx context.Context, id uuid.UUID) error
 	DeactivateSurvey(ctx context.Context, id uuid.UUID) error
 	DeactivateSurveyCampaign(ctx context.Context, id uuid.UUID) error
 	DeactivateSurveyGroup(ctx context.Context, id uuid.UUID) error
@@ -148,6 +167,8 @@ type Querier interface {
 	DeleteCaseType(ctx context.Context, id uuid.UUID) error
 	DeleteContact(ctx context.Context, id uuid.UUID) error
 	DeleteContribution(ctx context.Context, id uuid.UUID) error
+	DeleteDashboard(ctx context.Context, id uuid.UUID) error
+	DeleteDashboardWidget(ctx context.Context, id uuid.UUID) error
 	DeleteDiscount(ctx context.Context, id uuid.UUID) error
 	DeleteEntityTag(ctx context.Context, id uuid.UUID) error
 	DeleteEntityTagsByEntity(ctx context.Context, arg DeleteEntityTagsByEntityParams) error
@@ -167,6 +188,12 @@ type Querier interface {
 	DeletePriceField(ctx context.Context, id uuid.UUID) error
 	DeletePriceFieldValue(ctx context.Context, id uuid.UUID) error
 	DeletePriceSet(ctx context.Context, id uuid.UUID) error
+	DeleteReportInstance(ctx context.Context, id uuid.UUID) error
+	DeleteReportPermission(ctx context.Context, id uuid.UUID) error
+	DeleteReportResult(ctx context.Context, id uuid.UUID) error
+	DeleteReportResultsByInstance(ctx context.Context, reportInstanceID uuid.UUID) error
+	DeleteReportSubscription(ctx context.Context, id uuid.UUID) error
+	DeleteReportTemplate(ctx context.Context, id uuid.UUID) error
 	DeleteSurvey(ctx context.Context, id uuid.UUID) error
 	DeleteSurveyCampaign(ctx context.Context, id uuid.UUID) error
 	DeleteSurveyGroup(ctx context.Context, id uuid.UUID) error
@@ -180,8 +207,13 @@ type Querier interface {
 	GetActiveCampaignContacts(ctx context.Context, campaignID uuid.UUID) ([]CampaignContact, error)
 	GetActiveCampaignGroups(ctx context.Context, campaignID uuid.UUID) ([]CampaignGroup, error)
 	GetActiveCaseContacts(ctx context.Context, caseID uuid.UUID) ([]CaseContact, error)
+	GetActiveDashboardWidgets(ctx context.Context, dashboardID uuid.UUID) ([]DashboardWidget, error)
+	GetActiveDashboards(ctx context.Context) ([]Dashboard, error)
 	GetActiveEventFees(ctx context.Context) ([]EventFee, error)
 	GetActiveMembershipByContact(ctx context.Context, contactID uuid.UUID) (Membership, error)
+	GetActiveReportInstances(ctx context.Context) ([]ReportInstance, error)
+	GetActiveReportPermissions(ctx context.Context) ([]ReportPermission, error)
+	GetActiveReportSubscriptions(ctx context.Context) ([]ReportSubscription, error)
 	GetActiveSurveyCampaigns(ctx context.Context, surveyID uuid.UUID) ([]SurveyCampaign, error)
 	GetActiveSurveyGroups(ctx context.Context, surveyID uuid.UUID) ([]SurveyGroup, error)
 	GetActiveSurveyQuestionsBySurvey(ctx context.Context, surveyID uuid.UUID) ([]SurveyQuestion, error)
@@ -283,6 +315,18 @@ type Querier interface {
 	GetContribution(ctx context.Context, id uuid.UUID) (Contribution, error)
 	GetContributionsByContact(ctx context.Context, contactID uuid.UUID) ([]Contribution, error)
 	GetContributionsByDateRange(ctx context.Context, arg GetContributionsByDateRangeParams) ([]GetContributionsByDateRangeRow, error)
+	GetCustomReportTemplates(ctx context.Context, isActive sql.NullBool) ([]ReportTemplate, error)
+	GetDashboard(ctx context.Context, id uuid.UUID) (Dashboard, error)
+	GetDashboardByName(ctx context.Context, name string) (Dashboard, error)
+	GetDashboardStats(ctx context.Context, isActive sql.NullBool) ([]GetDashboardStatsRow, error)
+	GetDashboardSummary(ctx context.Context, isActive sql.NullBool) ([]GetDashboardSummaryRow, error)
+	GetDashboardWidget(ctx context.Context, id uuid.UUID) (DashboardWidget, error)
+	GetDashboardWidgetStats(ctx context.Context, arg GetDashboardWidgetStatsParams) ([]GetDashboardWidgetStatsRow, error)
+	GetDashboardWidgetSummary(ctx context.Context, isActive sql.NullBool) ([]GetDashboardWidgetSummaryRow, error)
+	GetDashboardWidgetsByDashboard(ctx context.Context, arg GetDashboardWidgetsByDashboardParams) ([]DashboardWidget, error)
+	GetDashboardWidgetsByType(ctx context.Context, arg GetDashboardWidgetsByTypeParams) ([]DashboardWidget, error)
+	GetDashboardsByCreator(ctx context.Context, arg GetDashboardsByCreatorParams) ([]Dashboard, error)
+	GetDefaultDashboard(ctx context.Context) (Dashboard, error)
 	GetDefaultEventFee(ctx context.Context, eventID uuid.UUID) (EventFee, error)
 	GetDefaultSurvey(ctx context.Context) (Survey, error)
 	GetDiscount(ctx context.Context, id uuid.UUID) (Discount, error)
@@ -305,6 +349,7 @@ type Querier interface {
 	GetFinancialAccount(ctx context.Context, id uuid.UUID) (FinancialAccount, error)
 	GetFinancialAccountByCode(ctx context.Context, accountCode sql.NullString) (FinancialAccount, error)
 	GetFinancialAccountByName(ctx context.Context, name string) (FinancialAccount, error)
+	GetLatestReportResult(ctx context.Context, reportInstanceID uuid.UUID) (ReportResult, error)
 	GetLineItem(ctx context.Context, id uuid.UUID) (LineItem, error)
 	GetLineItemsByEntity(ctx context.Context, arg GetLineItemsByEntityParams) ([]LineItem, error)
 	GetLineItemsByFinancialType(ctx context.Context, financialTypeID uuid.NullUUID) ([]LineItem, error)
@@ -343,9 +388,42 @@ type Querier interface {
 	GetPriceSet(ctx context.Context, id uuid.UUID) (PriceSet, error)
 	GetPriceSetByName(ctx context.Context, name string) (PriceSet, error)
 	GetPriceSetByTitle(ctx context.Context, title string) (PriceSet, error)
+	GetPublicReportPermissions(ctx context.Context, isActive sql.NullBool) ([]ReportPermission, error)
 	GetRegistrationsByContact(ctx context.Context, contactID uuid.UUID) ([]GetRegistrationsByContactRow, error)
 	GetRegistrationsByEvent(ctx context.Context, eventID uuid.UUID) ([]GetRegistrationsByEventRow, error)
+	GetReportInstance(ctx context.Context, id uuid.UUID) (ReportInstance, error)
+	GetReportInstanceByName(ctx context.Context, name string) (ReportInstance, error)
+	GetReportInstanceStats(ctx context.Context, isActive sql.NullBool) ([]GetReportInstanceStatsRow, error)
+	GetReportInstanceSummary(ctx context.Context, isActive sql.NullBool) ([]GetReportInstanceSummaryRow, error)
+	GetReportInstancesByCreator(ctx context.Context, arg GetReportInstancesByCreatorParams) ([]ReportInstance, error)
+	GetReportInstancesByTemplate(ctx context.Context, arg GetReportInstancesByTemplateParams) ([]ReportInstance, error)
+	GetReportPerformanceStats(ctx context.Context, executionDate sql.NullTime) ([]GetReportPerformanceStatsRow, error)
+	GetReportPermission(ctx context.Context, id uuid.UUID) (ReportPermission, error)
+	GetReportPermissionByTemplateAndRole(ctx context.Context, arg GetReportPermissionByTemplateAndRoleParams) (ReportPermission, error)
+	GetReportPermissionStats(ctx context.Context, isActive sql.NullBool) ([]GetReportPermissionStatsRow, error)
+	GetReportPermissionSummary(ctx context.Context, isActive sql.NullBool) ([]GetReportPermissionSummaryRow, error)
+	GetReportPermissionsByRole(ctx context.Context, arg GetReportPermissionsByRoleParams) ([]ReportPermission, error)
+	GetReportPermissionsByTemplate(ctx context.Context, arg GetReportPermissionsByTemplateParams) ([]ReportPermission, error)
+	GetReportPermissionsByType(ctx context.Context, arg GetReportPermissionsByTypeParams) ([]ReportPermission, error)
+	GetReportResult(ctx context.Context, id uuid.UUID) (ReportResult, error)
+	GetReportResultStats(ctx context.Context, reportInstanceID uuid.UUID) ([]GetReportResultStatsRow, error)
+	GetReportResultsByDateRange(ctx context.Context, arg GetReportResultsByDateRangeParams) ([]ReportResult, error)
+	GetReportResultsByInstance(ctx context.Context, reportInstanceID uuid.UUID) ([]ReportResult, error)
+	GetReportResultsByStatus(ctx context.Context, arg GetReportResultsByStatusParams) ([]ReportResult, error)
+	GetReportSubscription(ctx context.Context, id uuid.UUID) (ReportSubscription, error)
+	GetReportSubscriptionByInstanceAndContact(ctx context.Context, arg GetReportSubscriptionByInstanceAndContactParams) (ReportSubscription, error)
+	GetReportSubscriptionStats(ctx context.Context, isActive sql.NullBool) ([]GetReportSubscriptionStatsRow, error)
+	GetReportSubscriptionSummary(ctx context.Context, isActive sql.NullBool) ([]GetReportSubscriptionSummaryRow, error)
+	GetReportSubscriptionsByContact(ctx context.Context, arg GetReportSubscriptionsByContactParams) ([]ReportSubscription, error)
+	GetReportSubscriptionsByDeliveryMethod(ctx context.Context, arg GetReportSubscriptionsByDeliveryMethodParams) ([]ReportSubscription, error)
+	GetReportSubscriptionsByInstance(ctx context.Context, arg GetReportSubscriptionsByInstanceParams) ([]ReportSubscription, error)
+	GetReportTemplate(ctx context.Context, id uuid.UUID) (ReportTemplate, error)
+	GetReportTemplateByName(ctx context.Context, name string) (ReportTemplate, error)
+	GetReportTemplateStats(ctx context.Context, isActive sql.NullBool) ([]GetReportTemplateStatsRow, error)
+	GetReportTemplateSummary(ctx context.Context, isActive sql.NullBool) ([]GetReportTemplateSummaryRow, error)
+	GetReportTemplatesByType(ctx context.Context, arg GetReportTemplatesByTypeParams) ([]ReportTemplate, error)
 	GetRequiredSurveyQuestions(ctx context.Context, arg GetRequiredSurveyQuestionsParams) ([]SurveyQuestion, error)
+	GetScheduledReportInstances(ctx context.Context, isActive sql.NullBool) ([]ReportInstance, error)
 	GetSurvey(ctx context.Context, id uuid.UUID) (Survey, error)
 	GetSurveyAnalytics(ctx context.Context, surveyID uuid.UUID) ([]GetSurveyAnalyticsRow, error)
 	GetSurveyByTitle(ctx context.Context, title string) (Survey, error)
@@ -383,6 +461,7 @@ type Querier interface {
 	GetSurveyResponsesBySurvey(ctx context.Context, surveyID uuid.UUID) ([]SurveyResponse, error)
 	GetSurveyStats(ctx context.Context, isActive sql.NullBool) ([]GetSurveyStatsRow, error)
 	GetSurveyTargetAudience(ctx context.Context, isActive sql.NullBool) ([]GetSurveyTargetAudienceRow, error)
+	GetSystemReportTemplates(ctx context.Context, isActive sql.NullBool) ([]ReportTemplate, error)
 	GetTag(ctx context.Context, id uuid.UUID) (Tag, error)
 	GetTagByName(ctx context.Context, name string) (Tag, error)
 	GetTagSet(ctx context.Context, id uuid.UUID) (TagSet, error)
@@ -415,9 +494,11 @@ type Querier interface {
 	ListActiveCaseContacts(ctx context.Context) ([]CaseContact, error)
 	ListActiveCaseStatus(ctx context.Context) ([]CaseStatus, error)
 	ListActiveCaseTypes(ctx context.Context) ([]CaseType, error)
+	ListActiveDashboardWidgets(ctx context.Context) ([]DashboardWidget, error)
 	ListActivePriceFieldValues(ctx context.Context) ([]PriceFieldValue, error)
 	ListActivePriceFields(ctx context.Context) ([]PriceField, error)
 	ListActivePriceSets(ctx context.Context) ([]PriceSet, error)
+	ListActiveReportTemplates(ctx context.Context) ([]ReportTemplate, error)
 	ListActiveSurveyCampaigns(ctx context.Context) ([]SurveyCampaign, error)
 	ListActiveSurveyGroups(ctx context.Context) ([]SurveyGroup, error)
 	ListActiveSurveyQuestions(ctx context.Context) ([]SurveyQuestion, error)
@@ -478,6 +559,10 @@ type Querier interface {
 	ListContributionsByStatus(ctx context.Context, arg ListContributionsByStatusParams) ([]ListContributionsByStatusRow, error)
 	ListContributionsByType(ctx context.Context, arg ListContributionsByTypeParams) ([]ListContributionsByTypeRow, error)
 	ListCurrentMemberStatuses(ctx context.Context, isActive sql.NullBool) ([]MembershipStatus, error)
+	ListDashboardWidgets(ctx context.Context) ([]DashboardWidget, error)
+	ListDashboardWidgetsByType(ctx context.Context, arg ListDashboardWidgetsByTypeParams) ([]DashboardWidget, error)
+	ListDashboards(ctx context.Context) ([]Dashboard, error)
+	ListDashboardsByDateRange(ctx context.Context, arg ListDashboardsByDateRangeParams) ([]Dashboard, error)
 	ListDefaultPriceFieldValues(ctx context.Context, isActive sql.NullBool) ([]PriceFieldValue, error)
 	ListDiscounts(ctx context.Context, isActive sql.NullBool) ([]Discount, error)
 	ListEntityTags(ctx context.Context) ([]EntityTag, error)
@@ -488,6 +573,7 @@ type Querier interface {
 	ListEvents(ctx context.Context, arg ListEventsParams) ([]Event, error)
 	ListExpiringCampaigns(ctx context.Context, arg ListExpiringCampaignsParams) ([]Campaign, error)
 	ListExpiringMemberships(ctx context.Context, arg ListExpiringMembershipsParams) ([]Membership, error)
+	ListFailedReportResults(ctx context.Context) ([]ReportResult, error)
 	ListFinancialAccounts(ctx context.Context, isActive sql.NullBool) ([]FinancialAccount, error)
 	ListFinancialAccountsByType(ctx context.Context, arg ListFinancialAccountsByTypeParams) ([]FinancialAccount, error)
 	ListHeaderAccounts(ctx context.Context, arg ListHeaderAccountsParams) ([]FinancialAccount, error)
@@ -524,6 +610,16 @@ type Querier interface {
 	ListPriceSetsByExtends(ctx context.Context, arg ListPriceSetsByExtendsParams) ([]PriceSet, error)
 	ListPriceSetsByFinancialType(ctx context.Context, arg ListPriceSetsByFinancialTypeParams) ([]PriceSet, error)
 	ListRegistrationsByStatus(ctx context.Context, arg ListRegistrationsByStatusParams) ([]ListRegistrationsByStatusRow, error)
+	ListReportInstances(ctx context.Context) ([]ReportInstance, error)
+	ListReportInstancesByDateRange(ctx context.Context, arg ListReportInstancesByDateRangeParams) ([]ReportInstance, error)
+	ListReportPermissions(ctx context.Context) ([]ReportPermission, error)
+	ListReportPermissionsByDateRange(ctx context.Context, arg ListReportPermissionsByDateRangeParams) ([]ReportPermission, error)
+	ListReportResults(ctx context.Context) ([]ReportResult, error)
+	ListReportResultsByDateRange(ctx context.Context, arg ListReportResultsByDateRangeParams) ([]ReportResult, error)
+	ListReportSubscriptions(ctx context.Context) ([]ReportSubscription, error)
+	ListReportSubscriptionsByDateRange(ctx context.Context, arg ListReportSubscriptionsByDateRangeParams) ([]ReportSubscription, error)
+	ListReportTemplates(ctx context.Context) ([]ReportTemplate, error)
+	ListReportTemplatesByCreator(ctx context.Context, arg ListReportTemplatesByCreatorParams) ([]ReportTemplate, error)
 	ListReservedActivityTypes(ctx context.Context) ([]ActivityType, error)
 	ListReservedCampaignStatus(ctx context.Context, isActive sql.NullBool) ([]CampaignStatus, error)
 	ListReservedCampaignTypes(ctx context.Context, isActive sql.NullBool) ([]CampaignType, error)
@@ -548,6 +644,8 @@ type Querier interface {
 	ListTestParticipants(ctx context.Context, isTest sql.NullBool) ([]Participant, error)
 	ListTestSurveyResponses(ctx context.Context, isTest sql.NullBool) ([]SurveyResponse, error)
 	ListUpcomingEvents(ctx context.Context, arg ListUpcomingEventsParams) ([]Event, error)
+	MarkReportResultCompleted(ctx context.Context, id uuid.UUID) error
+	MarkReportResultFailed(ctx context.Context, arg MarkReportResultFailedParams) error
 	MarkSurveyResponseAbandoned(ctx context.Context, id uuid.UUID) error
 	MarkSurveyResponseCompleted(ctx context.Context, id uuid.UUID) error
 	MarkSurveyResponsePartial(ctx context.Context, id uuid.UUID) error
@@ -569,6 +667,8 @@ type Querier interface {
 	SearchCases(ctx context.Context, subject string) ([]Case, error)
 	SearchContacts(ctx context.Context, arg SearchContactsParams) ([]Contact, error)
 	SearchContributions(ctx context.Context, arg SearchContributionsParams) ([]SearchContributionsRow, error)
+	SearchDashboardWidgets(ctx context.Context, arg SearchDashboardWidgetsParams) ([]DashboardWidget, error)
+	SearchDashboards(ctx context.Context, arg SearchDashboardsParams) ([]Dashboard, error)
 	SearchDiscounts(ctx context.Context, arg SearchDiscountsParams) ([]Discount, error)
 	SearchEntityTags(ctx context.Context, name string) ([]EntityTag, error)
 	SearchEventFees(ctx context.Context, arg SearchEventFeesParams) ([]EventFee, error)
@@ -584,6 +684,11 @@ type Querier interface {
 	SearchPriceFieldValues(ctx context.Context, arg SearchPriceFieldValuesParams) ([]PriceFieldValue, error)
 	SearchPriceFields(ctx context.Context, arg SearchPriceFieldsParams) ([]PriceField, error)
 	SearchPriceSets(ctx context.Context, arg SearchPriceSetsParams) ([]PriceSet, error)
+	SearchReportInstances(ctx context.Context, arg SearchReportInstancesParams) ([]ReportInstance, error)
+	SearchReportPermissions(ctx context.Context, arg SearchReportPermissionsParams) ([]ReportPermission, error)
+	SearchReportResults(ctx context.Context, name string) ([]ReportResult, error)
+	SearchReportSubscriptions(ctx context.Context, arg SearchReportSubscriptionsParams) ([]ReportSubscription, error)
+	SearchReportTemplates(ctx context.Context, arg SearchReportTemplatesParams) ([]ReportTemplate, error)
 	SearchSurveyCampaigns(ctx context.Context, title string) ([]SurveyCampaign, error)
 	SearchSurveyGroups(ctx context.Context, title string) ([]SurveyGroup, error)
 	SearchSurveyQuestions(ctx context.Context, arg SearchSurveyQuestionsParams) ([]SurveyQuestion, error)
@@ -592,6 +697,7 @@ type Querier interface {
 	SearchSurveys(ctx context.Context, title string) ([]Survey, error)
 	SearchTagSets(ctx context.Context, arg SearchTagSetsParams) ([]TagSet, error)
 	SearchTags(ctx context.Context, arg SearchTagsParams) ([]Tag, error)
+	SetDefaultDashboard(ctx context.Context) error
 	SetDefaultSurvey(ctx context.Context) error
 	UpdateActivity(ctx context.Context, arg UpdateActivityParams) (Activity, error)
 	UpdateActivityContact(ctx context.Context, arg UpdateActivityContactParams) (ActivityContact, error)
@@ -622,6 +728,12 @@ type Querier interface {
 	UpdateCaseTypeWeight(ctx context.Context, arg UpdateCaseTypeWeightParams) error
 	UpdateContact(ctx context.Context, arg UpdateContactParams) (Contact, error)
 	UpdateContribution(ctx context.Context, arg UpdateContributionParams) (Contribution, error)
+	UpdateDashboard(ctx context.Context, arg UpdateDashboardParams) (Dashboard, error)
+	UpdateDashboardLayout(ctx context.Context, arg UpdateDashboardLayoutParams) error
+	UpdateDashboardWidget(ctx context.Context, arg UpdateDashboardWidgetParams) (DashboardWidget, error)
+	UpdateDashboardWidgetConfiguration(ctx context.Context, arg UpdateDashboardWidgetConfigurationParams) error
+	UpdateDashboardWidgetPosition(ctx context.Context, arg UpdateDashboardWidgetPositionParams) error
+	UpdateDashboardWidgetSize(ctx context.Context, arg UpdateDashboardWidgetSizeParams) error
 	UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) (Discount, error)
 	UpdateEntityTag(ctx context.Context, arg UpdateEntityTagParams) (EntityTag, error)
 	UpdateEvent(ctx context.Context, arg UpdateEventParams) (Event, error)
@@ -642,6 +754,18 @@ type Querier interface {
 	UpdatePriceField(ctx context.Context, arg UpdatePriceFieldParams) (PriceField, error)
 	UpdatePriceFieldValue(ctx context.Context, arg UpdatePriceFieldValueParams) (PriceFieldValue, error)
 	UpdatePriceSet(ctx context.Context, arg UpdatePriceSetParams) (PriceSet, error)
+	UpdateReportInstance(ctx context.Context, arg UpdateReportInstanceParams) (ReportInstance, error)
+	UpdateReportInstanceLastRun(ctx context.Context, arg UpdateReportInstanceLastRunParams) error
+	UpdateReportInstanceNextRun(ctx context.Context, arg UpdateReportInstanceNextRunParams) error
+	UpdateReportInstanceSchedule(ctx context.Context, arg UpdateReportInstanceScheduleParams) error
+	UpdateReportPermission(ctx context.Context, arg UpdateReportPermissionParams) (ReportPermission, error)
+	UpdateReportPermissionType(ctx context.Context, arg UpdateReportPermissionTypeParams) error
+	UpdateReportResult(ctx context.Context, arg UpdateReportResultParams) (ReportResult, error)
+	UpdateReportResultStatus(ctx context.Context, arg UpdateReportResultStatusParams) error
+	UpdateReportSubscription(ctx context.Context, arg UpdateReportSubscriptionParams) (ReportSubscription, error)
+	UpdateReportSubscriptionDeliveryConfig(ctx context.Context, arg UpdateReportSubscriptionDeliveryConfigParams) error
+	UpdateReportSubscriptionDeliveryMethod(ctx context.Context, arg UpdateReportSubscriptionDeliveryMethodParams) error
+	UpdateReportTemplate(ctx context.Context, arg UpdateReportTemplateParams) (ReportTemplate, error)
 	UpdateSurvey(ctx context.Context, arg UpdateSurveyParams) (Survey, error)
 	UpdateSurveyCampaign(ctx context.Context, arg UpdateSurveyCampaignParams) (SurveyCampaign, error)
 	UpdateSurveyGroup(ctx context.Context, arg UpdateSurveyGroupParams) (SurveyGroup, error)
