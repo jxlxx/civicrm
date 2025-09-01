@@ -438,6 +438,15 @@ type DiscountLink struct {
 	UpdatedAt   sql.NullTime `json:"updated_at"`
 }
 
+type Domain struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	Description sql.NullString `json:"description"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
 type Email struct {
 	ID             uuid.UUID      `json:"id"`
 	ContactID      uuid.UUID      `json:"contact_id"`
@@ -603,6 +612,32 @@ type Im struct {
 	UpdatedAt      sql.NullTime  `json:"updated_at"`
 }
 
+type Job struct {
+	ID          uuid.UUID      `json:"id"`
+	DomainID    uuid.UUID      `json:"domain_id"`
+	Name        string         `json:"name"`
+	Description sql.NullString `json:"description"`
+	JobType     string         `json:"job_type"`
+	Parameters  sql.NullString `json:"parameters"`
+	Schedule    sql.NullString `json:"schedule"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	LastRun     sql.NullTime   `json:"last_run"`
+	NextRun     sql.NullTime   `json:"next_run"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+type JobLog struct {
+	ID              uuid.UUID      `json:"id"`
+	JobID           uuid.UUID      `json:"job_id"`
+	Status          string         `json:"status"`
+	Message         sql.NullString `json:"message"`
+	StartedAt       sql.NullTime   `json:"started_at"`
+	CompletedAt     sql.NullTime   `json:"completed_at"`
+	ExecutionTimeMs sql.NullInt32  `json:"execution_time_ms"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+}
+
 type LineItem struct {
 	ID                  uuid.UUID      `json:"id"`
 	EntityTable         string         `json:"entity_table"`
@@ -718,6 +753,37 @@ type MembershipType struct {
 	UpdatedAt              sql.NullTime   `json:"updated_at"`
 }
 
+type MenuItem struct {
+	ID           uuid.UUID      `json:"id"`
+	NavigationID uuid.UUID      `json:"navigation_id"`
+	Name         string         `json:"name"`
+	Label        string         `json:"label"`
+	Url          sql.NullString `json:"url"`
+	Icon         sql.NullString `json:"icon"`
+	Permission   sql.NullString `json:"permission"`
+	Weight       sql.NullInt32  `json:"weight"`
+	IsActive     sql.NullBool   `json:"is_active"`
+	IsVisible    sql.NullBool   `json:"is_visible"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	UpdatedAt    sql.NullTime   `json:"updated_at"`
+}
+
+type Navigation struct {
+	ID         uuid.UUID      `json:"id"`
+	DomainID   uuid.UUID      `json:"domain_id"`
+	ParentID   uuid.NullUUID  `json:"parent_id"`
+	Name       string         `json:"name"`
+	Label      string         `json:"label"`
+	Url        sql.NullString `json:"url"`
+	Icon       sql.NullString `json:"icon"`
+	Permission sql.NullString `json:"permission"`
+	Weight     sql.NullInt32  `json:"weight"`
+	IsActive   sql.NullBool   `json:"is_active"`
+	IsVisible  sql.NullBool   `json:"is_visible"`
+	CreatedAt  sql.NullTime   `json:"created_at"`
+	UpdatedAt  sql.NullTime   `json:"updated_at"`
+}
+
 type Participant struct {
 	ID             uuid.UUID      `json:"id"`
 	EventID        uuid.UUID      `json:"event_id"`
@@ -826,6 +892,33 @@ type PriceSet struct {
 	UpdatedAt       sql.NullTime   `json:"updated_at"`
 }
 
+type Queue struct {
+	ID                uuid.UUID      `json:"id"`
+	DomainID          uuid.UUID      `json:"domain_id"`
+	Name              string         `json:"name"`
+	Description       sql.NullString `json:"description"`
+	IsActive          sql.NullBool   `json:"is_active"`
+	MaxRetries        sql.NullInt32  `json:"max_retries"`
+	RetryDelaySeconds sql.NullInt32  `json:"retry_delay_seconds"`
+	CreatedAt         sql.NullTime   `json:"created_at"`
+	UpdatedAt         sql.NullTime   `json:"updated_at"`
+}
+
+type QueueItem struct {
+	ID           uuid.UUID      `json:"id"`
+	QueueID      uuid.UUID      `json:"queue_id"`
+	Data         string         `json:"data"`
+	Priority     sql.NullInt32  `json:"priority"`
+	Status       sql.NullString `json:"status"`
+	Attempts     sql.NullInt32  `json:"attempts"`
+	ScheduledAt  sql.NullTime   `json:"scheduled_at"`
+	StartedAt    sql.NullTime   `json:"started_at"`
+	CompletedAt  sql.NullTime   `json:"completed_at"`
+	ErrorMessage sql.NullString `json:"error_message"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	UpdatedAt    sql.NullTime   `json:"updated_at"`
+}
+
 type Relationship struct {
 	ID                 uuid.UUID    `json:"id"`
 	ContactIDA         uuid.UUID    `json:"contact_id_a"`
@@ -913,6 +1006,18 @@ type ReportTemplate struct {
 	CreatedBy     uuid.NullUUID         `json:"created_by"`
 	CreatedAt     sql.NullTime          `json:"created_at"`
 	UpdatedAt     sql.NullTime          `json:"updated_at"`
+}
+
+type Setting struct {
+	ID          uuid.UUID      `json:"id"`
+	DomainID    uuid.UUID      `json:"domain_id"`
+	Name        string         `json:"name"`
+	Value       sql.NullString `json:"value"`
+	Description sql.NullString `json:"description"`
+	IsSystem    sql.NullBool   `json:"is_system"`
+	IsPublic    sql.NullBool   `json:"is_public"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
 }
 
 type StateProvince struct {
@@ -1021,6 +1126,46 @@ type TagSet struct {
 	Weight      sql.NullInt32  `json:"weight"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+type UfField struct {
+	ID              uuid.UUID      `json:"id"`
+	UfGroupID       uuid.UUID      `json:"uf_group_id"`
+	Name            string         `json:"name"`
+	Label           string         `json:"label"`
+	FieldType       string         `json:"field_type"`
+	IsRequired      sql.NullBool   `json:"is_required"`
+	IsActive        sql.NullBool   `json:"is_active"`
+	Weight          sql.NullInt32  `json:"weight"`
+	HelpPre         sql.NullString `json:"help_pre"`
+	HelpPost        sql.NullString `json:"help_post"`
+	Options         sql.NullString `json:"options"`
+	ValidationRules sql.NullString `json:"validation_rules"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
+type UfGroup struct {
+	ID          uuid.UUID      `json:"id"`
+	DomainID    uuid.UUID      `json:"domain_id"`
+	Name        string         `json:"name"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	IsReserved  sql.NullBool   `json:"is_reserved"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+type UfJoin struct {
+	ID          uuid.UUID     `json:"id"`
+	UfGroupID   uuid.UUID     `json:"uf_group_id"`
+	EntityTable string        `json:"entity_table"`
+	EntityID    uuid.NullUUID `json:"entity_id"`
+	Weight      sql.NullInt32 `json:"weight"`
+	IsActive    sql.NullBool  `json:"is_active"`
+	CreatedAt   sql.NullTime  `json:"created_at"`
+	UpdatedAt   sql.NullTime  `json:"updated_at"`
 }
 
 type UfMatch struct {
