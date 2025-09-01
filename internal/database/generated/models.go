@@ -130,6 +130,102 @@ type Address struct {
 	UpdatedAt       sql.NullTime   `json:"updated_at"`
 }
 
+type Campaign struct {
+	ID                 uuid.UUID      `json:"id"`
+	Name               string         `json:"name"`
+	Title              string         `json:"title"`
+	Description        sql.NullString `json:"description"`
+	CampaignTypeID     uuid.NullUUID  `json:"campaign_type_id"`
+	StatusID           uuid.NullUUID  `json:"status_id"`
+	ParentID           uuid.NullUUID  `json:"parent_id"`
+	IsActive           sql.NullBool   `json:"is_active"`
+	StartDate          sql.NullTime   `json:"start_date"`
+	EndDate            sql.NullTime   `json:"end_date"`
+	GoalRevenue        sql.NullString `json:"goal_revenue"`
+	GoalContacts       sql.NullInt32  `json:"goal_contacts"`
+	ActualRevenue      sql.NullString `json:"actual_revenue"`
+	ActualContacts     sql.NullInt32  `json:"actual_contacts"`
+	ExternalIdentifier sql.NullString `json:"external_identifier"`
+	CreatedDate        sql.NullTime   `json:"created_date"`
+	ModifiedDate       sql.NullTime   `json:"modified_date"`
+	CreatedAt          sql.NullTime   `json:"created_at"`
+	UpdatedAt          sql.NullTime   `json:"updated_at"`
+}
+
+type CampaignActivity struct {
+	ID         uuid.UUID    `json:"id"`
+	CampaignID uuid.UUID    `json:"campaign_id"`
+	ActivityID uuid.UUID    `json:"activity_id"`
+	IsDeleted  sql.NullBool `json:"is_deleted"`
+	CreatedAt  sql.NullTime `json:"created_at"`
+	UpdatedAt  sql.NullTime `json:"updated_at"`
+}
+
+type CampaignContact struct {
+	ID         uuid.UUID      `json:"id"`
+	CampaignID uuid.UUID      `json:"campaign_id"`
+	ContactID  uuid.UUID      `json:"contact_id"`
+	Role       string         `json:"role"`
+	Status     sql.NullString `json:"status"`
+	JoinDate   sql.NullTime   `json:"join_date"`
+	EndDate    sql.NullTime   `json:"end_date"`
+	IsActive   sql.NullBool   `json:"is_active"`
+	CreatedAt  sql.NullTime   `json:"created_at"`
+	UpdatedAt  sql.NullTime   `json:"updated_at"`
+}
+
+type CampaignContribution struct {
+	ID             uuid.UUID    `json:"id"`
+	CampaignID     uuid.UUID    `json:"campaign_id"`
+	ContributionID uuid.UUID    `json:"contribution_id"`
+	IsDeleted      sql.NullBool `json:"is_deleted"`
+	CreatedAt      sql.NullTime `json:"created_at"`
+	UpdatedAt      sql.NullTime `json:"updated_at"`
+}
+
+type CampaignEvent struct {
+	ID         uuid.UUID    `json:"id"`
+	CampaignID uuid.UUID    `json:"campaign_id"`
+	EventID    uuid.UUID    `json:"event_id"`
+	IsDeleted  sql.NullBool `json:"is_deleted"`
+	CreatedAt  sql.NullTime `json:"created_at"`
+	UpdatedAt  sql.NullTime `json:"updated_at"`
+}
+
+type CampaignGroup struct {
+	ID         uuid.UUID    `json:"id"`
+	CampaignID uuid.UUID    `json:"campaign_id"`
+	GroupID    uuid.UUID    `json:"group_id"`
+	IsActive   sql.NullBool `json:"is_active"`
+	CreatedAt  sql.NullTime `json:"created_at"`
+	UpdatedAt  sql.NullTime `json:"updated_at"`
+}
+
+type CampaignStatus struct {
+	ID         uuid.UUID      `json:"id"`
+	Name       string         `json:"name"`
+	Label      string         `json:"label"`
+	Grouping   sql.NullString `json:"grouping"`
+	Weight     sql.NullInt32  `json:"weight"`
+	IsActive   sql.NullBool   `json:"is_active"`
+	IsReserved sql.NullBool   `json:"is_reserved"`
+	Color      sql.NullString `json:"color"`
+	CreatedAt  sql.NullTime   `json:"created_at"`
+	UpdatedAt  sql.NullTime   `json:"updated_at"`
+}
+
+type CampaignType struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	Label       string         `json:"label"`
+	Description sql.NullString `json:"description"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	IsReserved  sql.NullBool   `json:"is_reserved"`
+	Weight      sql.NullInt32  `json:"weight"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
 type Case struct {
 	ID           uuid.UUID      `json:"id"`
 	CaseTypeID   uuid.UUID      `json:"case_type_id"`
@@ -276,6 +372,15 @@ type Email struct {
 	SignatureHtml  sql.NullString `json:"signature_html"`
 	CreatedAt      sql.NullTime   `json:"created_at"`
 	UpdatedAt      sql.NullTime   `json:"updated_at"`
+}
+
+type EntityTag struct {
+	ID          uuid.UUID    `json:"id"`
+	EntityTable string       `json:"entity_table"`
+	EntityID    uuid.UUID    `json:"entity_id"`
+	TagID       uuid.UUID    `json:"tag_id"`
+	CreatedAt   sql.NullTime `json:"created_at"`
+	UpdatedAt   sql.NullTime `json:"updated_at"`
 }
 
 type Event struct {
@@ -675,6 +780,33 @@ type StateProvince struct {
 	IsActive     sql.NullBool   `json:"is_active"`
 	CreatedAt    sql.NullTime   `json:"created_at"`
 	UpdatedAt    sql.NullTime   `json:"updated_at"`
+}
+
+type Tag struct {
+	ID          uuid.UUID      `json:"id"`
+	TagSetID    uuid.NullUUID  `json:"tag_set_id"`
+	Name        string         `json:"name"`
+	Description sql.NullString `json:"description"`
+	Color       sql.NullString `json:"color"`
+	Icon        sql.NullString `json:"icon"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	IsReserved  sql.NullBool   `json:"is_reserved"`
+	Weight      sql.NullInt32  `json:"weight"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+type TagSet struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	EntityTable string         `json:"entity_table"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	IsReserved  sql.NullBool   `json:"is_reserved"`
+	Weight      sql.NullInt32  `json:"weight"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
 }
 
 type Website struct {

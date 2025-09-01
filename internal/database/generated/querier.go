@@ -12,11 +12,18 @@ import (
 )
 
 type Querier interface {
+	ActivateCampaign(ctx context.Context, id uuid.UUID) error
+	ActivateCampaignContact(ctx context.Context, id uuid.UUID) error
+	ActivateCampaignGroup(ctx context.Context, id uuid.UUID) error
+	ActivateCampaignStatus(ctx context.Context, id uuid.UUID) error
+	ActivateCampaignType(ctx context.Context, id uuid.UUID) error
 	ActivateCaseContact(ctx context.Context, id uuid.UUID) error
 	ActivateCaseStatus(ctx context.Context, id uuid.UUID) error
 	ActivateCaseType(ctx context.Context, id uuid.UUID) error
 	ActivateMembershipStatus(ctx context.Context, id uuid.UUID) error
 	ActivateMembershipType(ctx context.Context, id uuid.UUID) error
+	ActivateTag(ctx context.Context, id uuid.UUID) error
+	ActivateTagSet(ctx context.Context, id uuid.UUID) error
 	CloseCase(ctx context.Context, arg CloseCaseParams) error
 	CountActiveActivityTypes(ctx context.Context) (int64, error)
 	CountActiveEventFees(ctx context.Context) (int64, error)
@@ -64,6 +71,14 @@ type Querier interface {
 	CreateActivity(ctx context.Context, arg CreateActivityParams) (Activity, error)
 	CreateActivityContact(ctx context.Context, arg CreateActivityContactParams) (ActivityContact, error)
 	CreateActivityType(ctx context.Context, arg CreateActivityTypeParams) (ActivityType, error)
+	CreateCampaign(ctx context.Context, arg CreateCampaignParams) (Campaign, error)
+	CreateCampaignActivity(ctx context.Context, arg CreateCampaignActivityParams) (CampaignActivity, error)
+	CreateCampaignContact(ctx context.Context, arg CreateCampaignContactParams) (CampaignContact, error)
+	CreateCampaignContribution(ctx context.Context, arg CreateCampaignContributionParams) (CampaignContribution, error)
+	CreateCampaignEvent(ctx context.Context, arg CreateCampaignEventParams) (CampaignEvent, error)
+	CreateCampaignGroup(ctx context.Context, arg CreateCampaignGroupParams) (CampaignGroup, error)
+	CreateCampaignStatus(ctx context.Context, arg CreateCampaignStatusParams) (CampaignStatus, error)
+	CreateCampaignType(ctx context.Context, arg CreateCampaignTypeParams) (CampaignType, error)
 	CreateCase(ctx context.Context, arg CreateCaseParams) (Case, error)
 	CreateCaseActivity(ctx context.Context, arg CreateCaseActivityParams) (CaseActivity, error)
 	CreateCaseContact(ctx context.Context, arg CreateCaseContactParams) (CaseContact, error)
@@ -72,6 +87,7 @@ type Querier interface {
 	CreateContact(ctx context.Context, arg CreateContactParams) (Contact, error)
 	CreateContribution(ctx context.Context, arg CreateContributionParams) (Contribution, error)
 	CreateDiscount(ctx context.Context, arg CreateDiscountParams) (Discount, error)
+	CreateEntityTag(ctx context.Context, arg CreateEntityTagParams) (EntityTag, error)
 	CreateEvent(ctx context.Context, arg CreateEventParams) (Event, error)
 	CreateEventFee(ctx context.Context, arg CreateEventFeeParams) (EventFee, error)
 	CreateEventRegistration(ctx context.Context, arg CreateEventRegistrationParams) (EventRegistration, error)
@@ -86,14 +102,31 @@ type Querier interface {
 	CreatePriceField(ctx context.Context, arg CreatePriceFieldParams) (PriceField, error)
 	CreatePriceFieldValue(ctx context.Context, arg CreatePriceFieldValueParams) (PriceFieldValue, error)
 	CreatePriceSet(ctx context.Context, arg CreatePriceSetParams) (PriceSet, error)
+	CreateTag(ctx context.Context, arg CreateTagParams) (Tag, error)
+	CreateTagSet(ctx context.Context, arg CreateTagSetParams) (TagSet, error)
+	DeactivateCampaign(ctx context.Context, id uuid.UUID) error
+	DeactivateCampaignContact(ctx context.Context, id uuid.UUID) error
+	DeactivateCampaignGroup(ctx context.Context, id uuid.UUID) error
+	DeactivateCampaignStatus(ctx context.Context, id uuid.UUID) error
+	DeactivateCampaignType(ctx context.Context, id uuid.UUID) error
 	DeactivateCaseContact(ctx context.Context, id uuid.UUID) error
 	DeactivateCaseStatus(ctx context.Context, id uuid.UUID) error
 	DeactivateCaseType(ctx context.Context, id uuid.UUID) error
 	DeactivateMembershipStatus(ctx context.Context, id uuid.UUID) error
 	DeactivateMembershipType(ctx context.Context, id uuid.UUID) error
+	DeactivateTag(ctx context.Context, id uuid.UUID) error
+	DeactivateTagSet(ctx context.Context, id uuid.UUID) error
 	DeleteActivity(ctx context.Context, id uuid.UUID) error
 	DeleteActivityContact(ctx context.Context, id uuid.UUID) error
 	DeleteActivityType(ctx context.Context, id uuid.UUID) error
+	DeleteCampaign(ctx context.Context, id uuid.UUID) error
+	DeleteCampaignActivity(ctx context.Context, id uuid.UUID) error
+	DeleteCampaignContact(ctx context.Context, id uuid.UUID) error
+	DeleteCampaignContribution(ctx context.Context, id uuid.UUID) error
+	DeleteCampaignEvent(ctx context.Context, id uuid.UUID) error
+	DeleteCampaignGroup(ctx context.Context, id uuid.UUID) error
+	DeleteCampaignStatus(ctx context.Context, id uuid.UUID) error
+	DeleteCampaignType(ctx context.Context, id uuid.UUID) error
 	DeleteCase(ctx context.Context, id uuid.UUID) error
 	DeleteCaseActivity(ctx context.Context, id uuid.UUID) error
 	DeleteCaseContact(ctx context.Context, id uuid.UUID) error
@@ -102,6 +135,9 @@ type Querier interface {
 	DeleteContact(ctx context.Context, id uuid.UUID) error
 	DeleteContribution(ctx context.Context, id uuid.UUID) error
 	DeleteDiscount(ctx context.Context, id uuid.UUID) error
+	DeleteEntityTag(ctx context.Context, id uuid.UUID) error
+	DeleteEntityTagsByEntity(ctx context.Context, arg DeleteEntityTagsByEntityParams) error
+	DeleteEntityTagsByTag(ctx context.Context, tagID uuid.UUID) error
 	DeleteEvent(ctx context.Context, id uuid.UUID) error
 	DeleteEventFee(ctx context.Context, id uuid.UUID) error
 	DeleteEventRegistration(ctx context.Context, id uuid.UUID) error
@@ -117,7 +153,11 @@ type Querier interface {
 	DeletePriceField(ctx context.Context, id uuid.UUID) error
 	DeletePriceFieldValue(ctx context.Context, id uuid.UUID) error
 	DeletePriceSet(ctx context.Context, id uuid.UUID) error
+	DeleteTag(ctx context.Context, id uuid.UUID) error
+	DeleteTagSet(ctx context.Context, id uuid.UUID) error
 	ExtendMembership(ctx context.Context, arg ExtendMembershipParams) error
+	GetActiveCampaignContacts(ctx context.Context, campaignID uuid.UUID) ([]CampaignContact, error)
+	GetActiveCampaignGroups(ctx context.Context, campaignID uuid.UUID) ([]CampaignGroup, error)
 	GetActiveCaseContacts(ctx context.Context, caseID uuid.UUID) ([]CaseContact, error)
 	GetActiveEventFees(ctx context.Context) ([]EventFee, error)
 	GetActiveMembershipByContact(ctx context.Context, contactID uuid.UUID) (Membership, error)
@@ -137,6 +177,55 @@ type Querier interface {
 	GetActivityType(ctx context.Context, id uuid.UUID) (ActivityType, error)
 	GetActivityTypeByLabel(ctx context.Context, label string) (ActivityType, error)
 	GetActivityTypeByName(ctx context.Context, name string) (ActivityType, error)
+	GetCampaign(ctx context.Context, id uuid.UUID) (Campaign, error)
+	GetCampaignActivitiesByActivity(ctx context.Context, activityID uuid.UUID) (CampaignActivity, error)
+	GetCampaignActivitiesByCampaign(ctx context.Context, campaignID uuid.UUID) ([]CampaignActivity, error)
+	GetCampaignActivitiesWithDetails(ctx context.Context, campaignID uuid.UUID) ([]GetCampaignActivitiesWithDetailsRow, error)
+	GetCampaignActivity(ctx context.Context, id uuid.UUID) (CampaignActivity, error)
+	GetCampaignActivityCount(ctx context.Context, campaignID uuid.UUID) (int64, error)
+	GetCampaignActivityStats(ctx context.Context, campaignID uuid.UUID) ([]GetCampaignActivityStatsRow, error)
+	GetCampaignByExternalId(ctx context.Context, externalIdentifier sql.NullString) (Campaign, error)
+	GetCampaignByName(ctx context.Context, name string) (Campaign, error)
+	GetCampaignContact(ctx context.Context, id uuid.UUID) (CampaignContact, error)
+	GetCampaignContactByCampaignAndContact(ctx context.Context, arg GetCampaignContactByCampaignAndContactParams) (CampaignContact, error)
+	GetCampaignContactStats(ctx context.Context, isActive sql.NullBool) ([]GetCampaignContactStatsRow, error)
+	GetCampaignContactsByCampaign(ctx context.Context, campaignID uuid.UUID) ([]CampaignContact, error)
+	GetCampaignContactsByContact(ctx context.Context, contactID uuid.UUID) ([]CampaignContact, error)
+	GetCampaignContactsByRole(ctx context.Context, arg GetCampaignContactsByRoleParams) ([]CampaignContact, error)
+	GetCampaignContactsByStatus(ctx context.Context, arg GetCampaignContactsByStatusParams) ([]CampaignContact, error)
+	GetCampaignContribution(ctx context.Context, id uuid.UUID) (CampaignContribution, error)
+	GetCampaignContributionCount(ctx context.Context, campaignID uuid.UUID) (int64, error)
+	GetCampaignContributionStats(ctx context.Context, campaignID uuid.UUID) ([]GetCampaignContributionStatsRow, error)
+	GetCampaignContributionsByCampaign(ctx context.Context, campaignID uuid.UUID) ([]CampaignContribution, error)
+	GetCampaignContributionsByContribution(ctx context.Context, contributionID uuid.UUID) (CampaignContribution, error)
+	GetCampaignContributionsWithDetails(ctx context.Context, campaignID uuid.UUID) ([]GetCampaignContributionsWithDetailsRow, error)
+	GetCampaignEvent(ctx context.Context, id uuid.UUID) (CampaignEvent, error)
+	GetCampaignEventCount(ctx context.Context, campaignID uuid.UUID) (int64, error)
+	GetCampaignEventStats(ctx context.Context, campaignID uuid.UUID) ([]GetCampaignEventStatsRow, error)
+	GetCampaignEventSummary(ctx context.Context, isActive sql.NullBool) ([]GetCampaignEventSummaryRow, error)
+	GetCampaignEventsByCampaign(ctx context.Context, campaignID uuid.UUID) ([]CampaignEvent, error)
+	GetCampaignEventsByEvent(ctx context.Context, eventID uuid.UUID) (CampaignEvent, error)
+	GetCampaignEventsWithDetails(ctx context.Context, campaignID uuid.UUID) ([]GetCampaignEventsWithDetailsRow, error)
+	GetCampaignGroup(ctx context.Context, id uuid.UUID) (CampaignGroup, error)
+	GetCampaignGroupByCampaignAndGroup(ctx context.Context, arg GetCampaignGroupByCampaignAndGroupParams) (CampaignGroup, error)
+	GetCampaignGroupStats(ctx context.Context, isActive sql.NullBool) ([]GetCampaignGroupStatsRow, error)
+	GetCampaignGroupsByCampaign(ctx context.Context, campaignID uuid.UUID) ([]CampaignGroup, error)
+	GetCampaignGroupsByGroup(ctx context.Context, groupID uuid.UUID) ([]CampaignGroup, error)
+	GetCampaignHierarchy(ctx context.Context) ([]GetCampaignHierarchyRow, error)
+	GetCampaignParticipantSummary(ctx context.Context, isActive sql.NullBool) ([]GetCampaignParticipantSummaryRow, error)
+	GetCampaignRevenueSummary(ctx context.Context, isActive sql.NullBool) ([]GetCampaignRevenueSummaryRow, error)
+	GetCampaignStats(ctx context.Context, isActive sql.NullBool) ([]GetCampaignStatsRow, error)
+	GetCampaignStatus(ctx context.Context, id uuid.UUID) (CampaignStatus, error)
+	GetCampaignStatusByName(ctx context.Context, name string) (CampaignStatus, error)
+	GetCampaignStatusStats(ctx context.Context, isActive sql.NullBool) ([]GetCampaignStatusStatsRow, error)
+	GetCampaignTargetAudience(ctx context.Context, isActive sql.NullBool) ([]GetCampaignTargetAudienceRow, error)
+	GetCampaignTimeline(ctx context.Context, campaignID uuid.UUID) ([]GetCampaignTimelineRow, error)
+	GetCampaignType(ctx context.Context, id uuid.UUID) (CampaignType, error)
+	GetCampaignTypeByName(ctx context.Context, name string) (CampaignType, error)
+	GetCampaignTypeStats(ctx context.Context, isActive sql.NullBool) ([]GetCampaignTypeStatsRow, error)
+	GetCampaignsByParent(ctx context.Context, parentID uuid.NullUUID) ([]Campaign, error)
+	GetCampaignsByStatus(ctx context.Context, statusID uuid.NullUUID) ([]Campaign, error)
+	GetCampaignsByType(ctx context.Context, campaignTypeID uuid.NullUUID) ([]Campaign, error)
 	GetCase(ctx context.Context, id uuid.UUID) (Case, error)
 	GetCaseActivitiesByActivity(ctx context.Context, activityID uuid.UUID) (CaseActivity, error)
 	GetCaseActivitiesByCase(ctx context.Context, caseID uuid.UUID) ([]CaseActivity, error)
@@ -172,6 +261,13 @@ type Querier interface {
 	GetDefaultEventFee(ctx context.Context, eventID uuid.UUID) (EventFee, error)
 	GetDiscount(ctx context.Context, id uuid.UUID) (Discount, error)
 	GetDiscountByName(ctx context.Context, name string) (Discount, error)
+	GetEntityTag(ctx context.Context, id uuid.UUID) (EntityTag, error)
+	GetEntityTagCount(ctx context.Context, arg GetEntityTagCountParams) (int64, error)
+	GetEntityTagStats(ctx context.Context) ([]GetEntityTagStatsRow, error)
+	GetEntityTagsByEntity(ctx context.Context, arg GetEntityTagsByEntityParams) ([]EntityTag, error)
+	GetEntityTagsByTable(ctx context.Context, entityTable string) ([]EntityTag, error)
+	GetEntityTagsByTag(ctx context.Context, tagID uuid.UUID) ([]EntityTag, error)
+	GetEntityTagsWithDetails(ctx context.Context, arg GetEntityTagsWithDetailsParams) ([]GetEntityTagsWithDetailsRow, error)
 	GetEvent(ctx context.Context, id uuid.UUID) (Event, error)
 	GetEventByTitle(ctx context.Context, title string) (Event, error)
 	GetEventFee(ctx context.Context, id uuid.UUID) (EventFee, error)
@@ -213,6 +309,7 @@ type Querier interface {
 	GetParticipantsByStatus(ctx context.Context, statusID uuid.UUID) ([]Participant, error)
 	GetPastActivities(ctx context.Context) ([]Activity, error)
 	GetPastRegistrations(ctx context.Context) ([]GetPastRegistrationsRow, error)
+	GetPopularTags(ctx context.Context, arg GetPopularTagsParams) ([]GetPopularTagsRow, error)
 	GetPriceField(ctx context.Context, id uuid.UUID) (PriceField, error)
 	GetPriceFieldByName(ctx context.Context, arg GetPriceFieldByNameParams) (PriceField, error)
 	GetPriceFieldValue(ctx context.Context, id uuid.UUID) (PriceFieldValue, error)
@@ -222,6 +319,16 @@ type Querier interface {
 	GetPriceSetByTitle(ctx context.Context, title string) (PriceSet, error)
 	GetRegistrationsByContact(ctx context.Context, contactID uuid.UUID) ([]GetRegistrationsByContactRow, error)
 	GetRegistrationsByEvent(ctx context.Context, eventID uuid.UUID) ([]GetRegistrationsByEventRow, error)
+	GetTag(ctx context.Context, id uuid.UUID) (Tag, error)
+	GetTagByName(ctx context.Context, name string) (Tag, error)
+	GetTagSet(ctx context.Context, id uuid.UUID) (TagSet, error)
+	GetTagSetByName(ctx context.Context, name string) (TagSet, error)
+	GetTagSetStats(ctx context.Context, isActive sql.NullBool) ([]GetTagSetStatsRow, error)
+	GetTagSetsByEntityTable(ctx context.Context, arg GetTagSetsByEntityTableParams) ([]TagSet, error)
+	GetTagStats(ctx context.Context, isActive sql.NullBool) ([]GetTagStatsRow, error)
+	GetTaggedEntities(ctx context.Context, entityTable string) ([]GetTaggedEntitiesRow, error)
+	GetTagsByEntityTable(ctx context.Context, arg GetTagsByEntityTableParams) ([]Tag, error)
+	GetTagsByTagSet(ctx context.Context, arg GetTagsByTagSetParams) ([]Tag, error)
 	GetTotalContributions(ctx context.Context) (int64, error)
 	GetTotalContributionsByContact(ctx context.Context, contactID uuid.UUID) (int64, error)
 	GetTotalLineItemsByEntity(ctx context.Context, arg GetTotalLineItemsByEntityParams) (interface{}, error)
@@ -229,15 +336,26 @@ type Querier interface {
 	GetUpcomingRegistrations(ctx context.Context) ([]GetUpcomingRegistrationsRow, error)
 	HardDeleteActivity(ctx context.Context, id uuid.UUID) error
 	HardDeleteActivityContact(ctx context.Context, id uuid.UUID) error
+	HardDeleteCampaignActivity(ctx context.Context, id uuid.UUID) error
+	HardDeleteCampaignContribution(ctx context.Context, id uuid.UUID) error
+	HardDeleteCampaignEvent(ctx context.Context, id uuid.UUID) error
 	HardDeleteCase(ctx context.Context, id uuid.UUID) error
 	HardDeleteCaseActivity(ctx context.Context, id uuid.UUID) error
 	ListActiveActivityTypes(ctx context.Context) ([]ActivityType, error)
+	ListActiveCampaignContacts(ctx context.Context) ([]CampaignContact, error)
+	ListActiveCampaignGroups(ctx context.Context) ([]CampaignGroup, error)
+	ListActiveCampaignStatus(ctx context.Context) ([]CampaignStatus, error)
+	ListActiveCampaignStatuses(ctx context.Context, isActive sql.NullBool) ([]CampaignStatus, error)
+	ListActiveCampaignTypes(ctx context.Context) ([]CampaignType, error)
+	ListActiveCampaigns(ctx context.Context) ([]Campaign, error)
 	ListActiveCaseContacts(ctx context.Context) ([]CaseContact, error)
 	ListActiveCaseStatus(ctx context.Context) ([]CaseStatus, error)
 	ListActiveCaseTypes(ctx context.Context) ([]CaseType, error)
 	ListActivePriceFieldValues(ctx context.Context) ([]PriceFieldValue, error)
 	ListActivePriceFields(ctx context.Context) ([]PriceField, error)
 	ListActivePriceSets(ctx context.Context) ([]PriceSet, error)
+	ListActiveTagSets(ctx context.Context) ([]TagSet, error)
+	ListActiveTags(ctx context.Context) ([]Tag, error)
 	ListActivityTypes(ctx context.Context) ([]ActivityType, error)
 	ListAdminStatuses(ctx context.Context, isActive sql.NullBool) ([]MembershipStatus, error)
 	ListAllActivities(ctx context.Context) ([]Activity, error)
@@ -246,6 +364,27 @@ type Querier interface {
 	ListAllLineItems(ctx context.Context) ([]LineItem, error)
 	ListAllParticipants(ctx context.Context) ([]Participant, error)
 	ListAllRegistrations(ctx context.Context, arg ListAllRegistrationsParams) ([]ListAllRegistrationsRow, error)
+	ListCampaignActivities(ctx context.Context) ([]CampaignActivity, error)
+	ListCampaignActivitiesByDateRange(ctx context.Context, arg ListCampaignActivitiesByDateRangeParams) ([]CampaignActivity, error)
+	ListCampaignActivitiesByType(ctx context.Context, activityTypeID uuid.UUID) ([]CampaignActivity, error)
+	ListCampaignContacts(ctx context.Context) ([]CampaignContact, error)
+	ListCampaignContactsByDateRange(ctx context.Context, arg ListCampaignContactsByDateRangeParams) ([]CampaignContact, error)
+	ListCampaignContactsByRole(ctx context.Context, role string) ([]CampaignContact, error)
+	ListCampaignContactsByStatus(ctx context.Context, status sql.NullString) ([]CampaignContact, error)
+	ListCampaignContributions(ctx context.Context) ([]CampaignContribution, error)
+	ListCampaignContributionsByAmount(ctx context.Context, arg ListCampaignContributionsByAmountParams) ([]CampaignContribution, error)
+	ListCampaignContributionsByDateRange(ctx context.Context, arg ListCampaignContributionsByDateRangeParams) ([]CampaignContribution, error)
+	ListCampaignEvents(ctx context.Context) ([]CampaignEvent, error)
+	ListCampaignEventsByDateRange(ctx context.Context, arg ListCampaignEventsByDateRangeParams) ([]CampaignEvent, error)
+	ListCampaignEventsByType(ctx context.Context) ([]CampaignEvent, error)
+	ListCampaignGroups(ctx context.Context) ([]CampaignGroup, error)
+	ListCampaignStatus(ctx context.Context, isActive sql.NullBool) ([]CampaignStatus, error)
+	ListCampaignStatusByGrouping(ctx context.Context, arg ListCampaignStatusByGroupingParams) ([]CampaignStatus, error)
+	ListCampaignTypes(ctx context.Context, isActive sql.NullBool) ([]CampaignType, error)
+	ListCampaigns(ctx context.Context) ([]Campaign, error)
+	ListCampaignsByDateRange(ctx context.Context, arg ListCampaignsByDateRangeParams) ([]Campaign, error)
+	ListCampaignsByGoal(ctx context.Context, arg ListCampaignsByGoalParams) ([]Campaign, error)
+	ListCancelledCampaignStatus(ctx context.Context, isActive sql.NullBool) ([]CampaignStatus, error)
 	ListCaseActivities(ctx context.Context) ([]CaseActivity, error)
 	ListCaseActivitiesByDateRange(ctx context.Context, arg ListCaseActivitiesByDateRangeParams) ([]CaseActivity, error)
 	ListCaseActivitiesByType(ctx context.Context, activityTypeID uuid.UUID) ([]CaseActivity, error)
@@ -265,6 +404,7 @@ type Querier interface {
 	ListChildAccounts(ctx context.Context, arg ListChildAccountsParams) ([]FinancialAccount, error)
 	ListClosedCaseStatus(ctx context.Context, isActive sql.NullBool) ([]CaseStatus, error)
 	ListClosedCases(ctx context.Context) ([]Case, error)
+	ListCompletedCampaignStatus(ctx context.Context, isActive sql.NullBool) ([]CampaignStatus, error)
 	ListContacts(ctx context.Context, arg ListContactsParams) ([]Contact, error)
 	ListContributions(ctx context.Context, arg ListContributionsParams) ([]ListContributionsRow, error)
 	ListContributionsByStatus(ctx context.Context, arg ListContributionsByStatusParams) ([]ListContributionsByStatusRow, error)
@@ -272,9 +412,13 @@ type Querier interface {
 	ListCurrentMemberStatuses(ctx context.Context, isActive sql.NullBool) ([]MembershipStatus, error)
 	ListDefaultPriceFieldValues(ctx context.Context, isActive sql.NullBool) ([]PriceFieldValue, error)
 	ListDiscounts(ctx context.Context, isActive sql.NullBool) ([]Discount, error)
+	ListEntityTags(ctx context.Context) ([]EntityTag, error)
+	ListEntityTagsByTable(ctx context.Context, entityTable string) ([]EntityTag, error)
+	ListEntityTagsByTagSet(ctx context.Context, tagSetID uuid.NullUUID) ([]EntityTag, error)
 	ListEventFees(ctx context.Context) ([]EventFee, error)
 	ListEventFeesByEvent(ctx context.Context, arg ListEventFeesByEventParams) ([]EventFee, error)
 	ListEvents(ctx context.Context, arg ListEventsParams) ([]Event, error)
+	ListExpiringCampaigns(ctx context.Context, arg ListExpiringCampaignsParams) ([]Campaign, error)
 	ListExpiringMemberships(ctx context.Context, arg ListExpiringMembershipsParams) ([]Membership, error)
 	ListFinancialAccounts(ctx context.Context, isActive sql.NullBool) ([]FinancialAccount, error)
 	ListFinancialAccountsByType(ctx context.Context, arg ListFinancialAccountsByTypeParams) ([]FinancialAccount, error)
@@ -302,6 +446,7 @@ type Querier interface {
 	ListOpenCaseStatus(ctx context.Context, isActive sql.NullBool) ([]CaseStatus, error)
 	ListOpenCases(ctx context.Context) ([]Case, error)
 	ListPastEvents(ctx context.Context, arg ListPastEventsParams) ([]Event, error)
+	ListPlannedCampaignStatus(ctx context.Context, isActive sql.NullBool) ([]CampaignStatus, error)
 	ListPriceFieldValues(ctx context.Context, priceFieldID uuid.UUID) ([]PriceFieldValue, error)
 	ListPriceFieldValuesByFinancialType(ctx context.Context, arg ListPriceFieldValuesByFinancialTypeParams) ([]PriceFieldValue, error)
 	ListPriceFields(ctx context.Context, priceSetID uuid.UUID) ([]PriceField, error)
@@ -312,14 +457,29 @@ type Querier interface {
 	ListPriceSetsByFinancialType(ctx context.Context, arg ListPriceSetsByFinancialTypeParams) ([]PriceSet, error)
 	ListRegistrationsByStatus(ctx context.Context, arg ListRegistrationsByStatusParams) ([]ListRegistrationsByStatusRow, error)
 	ListReservedActivityTypes(ctx context.Context) ([]ActivityType, error)
+	ListReservedCampaignStatus(ctx context.Context, isActive sql.NullBool) ([]CampaignStatus, error)
+	ListReservedCampaignTypes(ctx context.Context, isActive sql.NullBool) ([]CampaignType, error)
 	ListReservedCaseStatus(ctx context.Context, isActive sql.NullBool) ([]CaseStatus, error)
 	ListReservedCaseTypes(ctx context.Context, isActive sql.NullBool) ([]CaseType, error)
+	ListReservedTagSets(ctx context.Context, isActive sql.NullBool) ([]TagSet, error)
+	ListReservedTags(ctx context.Context, isActive sql.NullBool) ([]Tag, error)
+	ListTagSets(ctx context.Context, isActive sql.NullBool) ([]TagSet, error)
+	ListTags(ctx context.Context, isActive sql.NullBool) ([]Tag, error)
+	ListTagsByColor(ctx context.Context, arg ListTagsByColorParams) ([]Tag, error)
 	ListTargetActivityTypes(ctx context.Context) ([]ActivityType, error)
 	ListTestParticipants(ctx context.Context, isTest sql.NullBool) ([]Participant, error)
 	ListUpcomingEvents(ctx context.Context, arg ListUpcomingEventsParams) ([]Event, error)
 	SearchActivities(ctx context.Context, subject sql.NullString) ([]Activity, error)
 	SearchActivityContacts(ctx context.Context, role sql.NullString) ([]ActivityContact, error)
 	SearchActivityTypes(ctx context.Context, name string) ([]ActivityType, error)
+	SearchCampaignActivities(ctx context.Context, subject sql.NullString) ([]CampaignActivity, error)
+	SearchCampaignContacts(ctx context.Context, firstName sql.NullString) ([]CampaignContact, error)
+	SearchCampaignContributions(ctx context.Context, firstName sql.NullString) ([]CampaignContribution, error)
+	SearchCampaignEvents(ctx context.Context, title string) ([]CampaignEvent, error)
+	SearchCampaignGroups(ctx context.Context, title sql.NullString) ([]CampaignGroup, error)
+	SearchCampaignStatus(ctx context.Context, arg SearchCampaignStatusParams) ([]CampaignStatus, error)
+	SearchCampaignTypes(ctx context.Context, arg SearchCampaignTypesParams) ([]CampaignType, error)
+	SearchCampaigns(ctx context.Context, name string) ([]Campaign, error)
 	SearchCaseActivities(ctx context.Context, subject sql.NullString) ([]CaseActivity, error)
 	SearchCaseContacts(ctx context.Context, firstName sql.NullString) ([]CaseContact, error)
 	SearchCaseStatus(ctx context.Context, arg SearchCaseStatusParams) ([]CaseStatus, error)
@@ -328,6 +488,7 @@ type Querier interface {
 	SearchContacts(ctx context.Context, arg SearchContactsParams) ([]Contact, error)
 	SearchContributions(ctx context.Context, arg SearchContributionsParams) ([]SearchContributionsRow, error)
 	SearchDiscounts(ctx context.Context, arg SearchDiscountsParams) ([]Discount, error)
+	SearchEntityTags(ctx context.Context, name string) ([]EntityTag, error)
 	SearchEventFees(ctx context.Context, arg SearchEventFeesParams) ([]EventFee, error)
 	SearchEvents(ctx context.Context, arg SearchEventsParams) ([]Event, error)
 	SearchFinancialAccounts(ctx context.Context, arg SearchFinancialAccountsParams) ([]FinancialAccount, error)
@@ -341,9 +502,26 @@ type Querier interface {
 	SearchPriceFieldValues(ctx context.Context, arg SearchPriceFieldValuesParams) ([]PriceFieldValue, error)
 	SearchPriceFields(ctx context.Context, arg SearchPriceFieldsParams) ([]PriceField, error)
 	SearchPriceSets(ctx context.Context, arg SearchPriceSetsParams) ([]PriceSet, error)
+	SearchTagSets(ctx context.Context, arg SearchTagSetsParams) ([]TagSet, error)
+	SearchTags(ctx context.Context, arg SearchTagsParams) ([]Tag, error)
 	UpdateActivity(ctx context.Context, arg UpdateActivityParams) (Activity, error)
 	UpdateActivityContact(ctx context.Context, arg UpdateActivityContactParams) (ActivityContact, error)
 	UpdateActivityType(ctx context.Context, arg UpdateActivityTypeParams) (ActivityType, error)
+	UpdateCampaign(ctx context.Context, arg UpdateCampaignParams) (Campaign, error)
+	UpdateCampaignActivity(ctx context.Context, arg UpdateCampaignActivityParams) (CampaignActivity, error)
+	UpdateCampaignContact(ctx context.Context, arg UpdateCampaignContactParams) (CampaignContact, error)
+	UpdateCampaignContactRole(ctx context.Context, arg UpdateCampaignContactRoleParams) error
+	UpdateCampaignContactStatus(ctx context.Context, arg UpdateCampaignContactStatusParams) error
+	UpdateCampaignContacts(ctx context.Context, arg UpdateCampaignContactsParams) error
+	UpdateCampaignContribution(ctx context.Context, arg UpdateCampaignContributionParams) (CampaignContribution, error)
+	UpdateCampaignEvent(ctx context.Context, arg UpdateCampaignEventParams) (CampaignEvent, error)
+	UpdateCampaignGroup(ctx context.Context, arg UpdateCampaignGroupParams) (CampaignGroup, error)
+	UpdateCampaignRevenue(ctx context.Context, arg UpdateCampaignRevenueParams) error
+	UpdateCampaignStatus(ctx context.Context, arg UpdateCampaignStatusParams) (CampaignStatus, error)
+	UpdateCampaignStatusById(ctx context.Context, arg UpdateCampaignStatusByIdParams) error
+	UpdateCampaignStatusWeight(ctx context.Context, arg UpdateCampaignStatusWeightParams) error
+	UpdateCampaignType(ctx context.Context, arg UpdateCampaignTypeParams) (CampaignType, error)
+	UpdateCampaignTypeWeight(ctx context.Context, arg UpdateCampaignTypeWeightParams) error
 	UpdateCase(ctx context.Context, arg UpdateCaseParams) (Case, error)
 	UpdateCaseActivity(ctx context.Context, arg UpdateCaseActivityParams) (CaseActivity, error)
 	UpdateCaseContact(ctx context.Context, arg UpdateCaseContactParams) (CaseContact, error)
@@ -356,6 +534,7 @@ type Querier interface {
 	UpdateContact(ctx context.Context, arg UpdateContactParams) (Contact, error)
 	UpdateContribution(ctx context.Context, arg UpdateContributionParams) (Contribution, error)
 	UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) (Discount, error)
+	UpdateEntityTag(ctx context.Context, arg UpdateEntityTagParams) (EntityTag, error)
 	UpdateEvent(ctx context.Context, arg UpdateEventParams) (Event, error)
 	UpdateEventFee(ctx context.Context, arg UpdateEventFeeParams) (EventFee, error)
 	UpdateEventRegistration(ctx context.Context, arg UpdateEventRegistrationParams) (EventRegistration, error)
@@ -374,6 +553,11 @@ type Querier interface {
 	UpdatePriceField(ctx context.Context, arg UpdatePriceFieldParams) (PriceField, error)
 	UpdatePriceFieldValue(ctx context.Context, arg UpdatePriceFieldValueParams) (PriceFieldValue, error)
 	UpdatePriceSet(ctx context.Context, arg UpdatePriceSetParams) (PriceSet, error)
+	UpdateTag(ctx context.Context, arg UpdateTagParams) (Tag, error)
+	UpdateTagColor(ctx context.Context, arg UpdateTagColorParams) error
+	UpdateTagSet(ctx context.Context, arg UpdateTagSetParams) (TagSet, error)
+	UpdateTagSetWeight(ctx context.Context, arg UpdateTagSetWeightParams) error
+	UpdateTagWeight(ctx context.Context, arg UpdateTagWeightParams) error
 }
 
 var _ Querier = (*Queries)(nil)
