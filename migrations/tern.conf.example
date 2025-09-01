@@ -1,0 +1,20 @@
+# Tern configuration for CiviCRM
+# Copy this file to tern.conf and customize for your environment
+
+database:
+  host: ${DB_HOST:-localhost}
+  port: ${DB_PORT:-5432}
+  database: ${DB_NAME:-civicrm}
+  user: ${DB_USER:-civicrm}
+  password: ${DB_PASSWORD:-password}
+  ssl_mode: ${DB_SSL_MODE:-disable}
+
+data:
+  migrations_table: schema_version
+  migrations_path: migrations
+
+# Optional: Connection timeout
+connect_timeout: 10s
+
+# Optional: Statement timeout
+statement_timeout: 30s

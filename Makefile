@@ -1,6 +1,6 @@
 # CiviCRM Go Makefile
 
-.PHONY: help build run test clean deps lint format migrate
+.PHONY: help build run test clean deps lint format migrate migrate-new migrate-rollback migrate-status install-tern up down logs
 
 # Default target
 help:
@@ -13,8 +13,88 @@ help:
 	@echo "  lint      - Run linter"
 	@echo "  format    - Format code"
 	@echo "  migrate   - Run database migrations"
+	@echo "  migrate-new - Create new migration file"
+	@echo "  migrate-rollback - Rollback to specific version"
+	@echo "  migrate-status - Show migration status"
+	@echo "  install-tern - Install Tern migration tool"
+	@echo "  up        - Start development services (PostgreSQL, Redis)"
+	@echo "  down      - Stop development services"
+	@echo "  logs      - Show development service logs"
 	@echo "  docker    - Build Docker image"
 	@echo "  install   - Install the application"
+
+# Install Tern migration tool
+install-tern:
+	@echo "Installing Tern migration tool..."
+	go install github.com/jackc/tern/v2/cmd/tern@latest
+	@echo "Tern installation complete"
+
+# Start development services
+up:
+	@echo "Starting development services..."
+	docker compose up -d
+	@echo "Services started. PostgreSQL on port 5432, Redis on port 6379"
+	@echo "pgAdmin available at http://localhost:8081 (admin@civicrm.dev / admin_password)"
+
+# Stop development services
+down:
+	@echo "Stopping development services..."
+	docker compose down
+	@echo "Services stopped"
+
+# Show development service logs
+logs:
+	@echo "Development service logs:"
+	docker compose logs -f
+
+# Run database migrations
+migrate:
+	@echo "Running database migrations..."
+	@if [ -f config/config.yaml ]; then \
+		export PGHOST=localhost; \
+		export PGPORT=5432; \
+		export PGDATABASE=civicrm; \
+		export PGUSER=civicrm; \
+		export PGPASSWORD=civicrm_dev_password; \
+		export PGSSLMODE=disable; \
+		tern migrate -c tern.conf --migrations migrations; \
+	else \
+		echo "No config.yaml found. Please run 'make dev-setup' first."; \
+		exit 1; \
+	fi
+
+# Create new migration file
+migrate-new:
+	@read -p "Enter migration name: " name; \
+	export PGHOST=localhost; \
+	export PGPORT=5432; \
+	export PGDATABASE=civicrm; \
+	export PGUSER=civicrm; \
+	export PGPASSWORD=civicrm_dev_password; \
+	export PGSSLMODE=disable; \
+	tern new $$name
+
+# Rollback to specific version
+migrate-rollback:
+	@read -p "Enter target version: " version; \
+	export PGHOST=localhost; \
+	export PGPORT=5432; \
+	export PGDATABASE=civicrm; \
+	export PGUSER=civicrm; \
+	export PGPASSWORD=civicrm_dev_password; \
+	export PGSSLMODE=disable; \
+	tern migrate -c tern.conf --migrations migrations --target $$version
+
+# Show migration status
+migrate-status:
+	@echo "Migration status:"
+	export PGHOST=localhost; \
+	export PGPORT=5432; \
+	export PGDATABASE=civicrm; \
+	export PGUSER=civicrm; \
+	export PGPASSWORD=civicrm_dev_password; \
+	export PGSSLMODE=disable; \
+	tern migrate -c tern.conf --migrations migrations --dry-run
 
 # Build the application
 build:
@@ -33,11 +113,19 @@ test:
 	@echo "Running tests..."
 	go test -v ./...
 
-# Clean build artifacts
+# Clean build artifacts and Docker resources
 clean:
 	@echo "Cleaning build artifacts..."
 	rm -rf bin/
 	go clean
+	@echo "Cleaning Docker resources..."
+	@if docker compose ps -q > /dev/null 2>&1; then \
+		docker compose down -v --remove-orphans; \
+		echo "Docker containers, volumes, and networks removed"; \
+	else \
+		echo "No Docker containers running"; \
+	fi
+	@docker network prune -f > /dev/null 2>&1 || true
 
 # Download dependencies
 deps:
@@ -56,11 +144,6 @@ format:
 	go fmt ./...
 	goimports -w .
 
-# Run database migrations
-migrate:
-	@echo "Running database migrations..."
-	go run cmd/migrate/main.go
-
 # Build Docker image
 docker:
 	@echo "Building Docker image..."
@@ -76,8 +159,12 @@ install: build
 dev-setup: deps
 	@echo "Setting up development environment..."
 	@if [ ! -f config/config.yaml ]; then \
-		cp config/config.example.yaml config/config.yaml; \
-		echo "Created config/config.yaml from example"; \
+		cp config/config.development.yaml config/config.yaml; \
+		echo "Created config/config.yaml from development config"; \
+	fi
+	@if [ ! -f tern.conf ]; then \
+		cp migrations/tern.conf.example tern.conf; \
+		echo "Created tern.conf from example"; \
 	fi
 	@echo "Development setup complete"
 
