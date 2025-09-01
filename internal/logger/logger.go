@@ -97,10 +97,10 @@ func (l *Logger) WithContext(ctx map[string]interface{}) *Logger {
 	for k, v := range ctx {
 		args = append(args, k, v)
 	}
-	
+
 	// slog.With returns a new logger with the given attributes
 	newLogger := l.Logger.With(args...)
-	
+
 	return &Logger{
 		Logger: newLogger,
 		config: l.config,

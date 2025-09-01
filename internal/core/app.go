@@ -112,11 +112,11 @@ func (app *App) Start() error {
 }
 
 // Stop gracefully shuts down the application
-func (app *App) Stop() error {
+func (app *App) Stop(ctx context.Context) error {
 	app.Logger.Info("Stopping CiviCRM application")
 
 	// Stop API server
-	if err := app.API.Stop(); err != nil {
+	if err := app.API.Stop(ctx); err != nil {
 		app.Logger.Error("Failed to stop API server", "error", err)
 	}
 
@@ -151,7 +151,7 @@ func (app *App) Run() error {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	<-sigChan
 
-	return app.Stop()
+	return app.Stop(app.ctx)
 }
 
 // Context returns the application context

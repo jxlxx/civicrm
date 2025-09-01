@@ -11,24 +11,24 @@ import (
 
 // Config represents the application configuration
 type Config struct {
-	Database   DatabaseConfig `mapstructure:"database"`
-	Cache      CacheConfig    `mapstructure:"cache"`
-	Security   SecurityConfig `mapstructure:"security"`
-	API        APIConfig      `mapstructure:"api"`
-	Logging    LoggingConfig  `mapstructure:"logging"`
+	Database   DatabaseConfig   `mapstructure:"database"`
+	Cache      CacheConfig      `mapstructure:"cache"`
+	Security   SecurityConfig   `mapstructure:"security"`
+	API        APIConfig        `mapstructure:"api"`
+	Logging    LoggingConfig    `mapstructure:"logging"`
 	Extensions ExtensionsConfig `mapstructure:"extensions"`
 }
 
 // DatabaseConfig holds database connection settings
 type DatabaseConfig struct {
-	Driver   string `mapstructure:"driver"`
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
-	Database string `mapstructure:"database"`
-	SSLMode  string `mapstructure:"ssl_mode"`
-	MaxConns int    `mapstructure:"max_connections"`
+	Driver   string        `mapstructure:"driver"`
+	Host     string        `mapstructure:"host"`
+	Port     int           `mapstructure:"port"`
+	Username string        `mapstructure:"username"`
+	Password string        `mapstructure:"password"`
+	Database string        `mapstructure:"database"`
+	SSLMode  string        `mapstructure:"ssl_mode"`
+	MaxConns int           `mapstructure:"max_connections"`
 	Timeout  time.Duration `mapstructure:"timeout"`
 }
 
@@ -51,7 +51,7 @@ type SecurityConfig struct {
 	BCryptCost       int           `mapstructure:"bcrypt_cost"`
 	SessionTimeout   time.Duration `mapstructure:"session_timeout"`
 	MaxLoginAttempts int           `mapstructure:"max_login_attempts"`
-	LockoutDuration time.Duration `mapstructure:"lockout_duration"`
+	LockoutDuration  time.Duration `mapstructure:"lockout_duration"`
 }
 
 // APIConfig holds API server settings
@@ -119,12 +119,12 @@ func Load() (*Config, error) {
 // setDefaults sets default configuration values
 func setDefaults(config *Config) {
 	config.Database = DatabaseConfig{
-		Driver:      "postgres",
-		Host:        "localhost",
-		Port:        5432,
-		MaxConns:    10,
-		Timeout:     30 * time.Second,
-		SSLMode:     "disable",
+		Driver:   "postgres",
+		Host:     "localhost",
+		Port:     5432,
+		MaxConns: 10,
+		Timeout:  30 * time.Second,
+		SSLMode:  "disable",
 	}
 
 	config.Cache = CacheConfig{

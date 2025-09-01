@@ -2,11 +2,11 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/jxlxx/civicrm/internal/cache"
 	"github.com/jxlxx/civicrm/internal/config"
 	"github.com/jxlxx/civicrm/internal/database"
@@ -15,7 +15,7 @@ import (
 	"github.com/jxlxx/civicrm/internal/security"
 )
 
-// Server represents the API server
+// Server represents the API server using standard library HTTP
 type Server struct {
 	config     *config.APIConfig
 	logger     *logger.Logger
@@ -23,8 +23,8 @@ type Server struct {
 	cache      *cache.Manager
 	security   *security.Manager
 	extensions *extensions.Manager
-	router     *gin.Engine
 	server     *http.Server
+	handler    http.Handler
 }
 
 // New creates a new API server
@@ -38,54 +38,96 @@ func New(config *config.APIConfig, logger *logger.Logger, db *database.Database,
 		extensions: extensions,
 	}
 
-	if err := server.setupRouter(); err != nil {
-		return nil, fmt.Errorf("failed to setup router: %w", err)
+	// Create the server implementation
+	impl := &ServerImpl{
+		server: server,
+	}
+
+	// Create the HTTP handler using generated code
+	server.handler = Handler(impl)
+
+	// Add middleware
+	server.handler = server.addMiddleware(server.handler)
+
+	// Create HTTP server
+	server.server = &http.Server{
+		Addr:         fmt.Sprintf("%s:%d", config.Host, config.Port),
+		Handler:      server.handler,
+		ReadTimeout:  config.ReadTimeout,
+		WriteTimeout: config.WriteTimeout,
+		IdleTimeout:  config.IdleTimeout,
 	}
 
 	return server, nil
 }
 
-// setupRouter configures the HTTP router
-func (s *Server) setupRouter() error {
-	gin.SetMode(gin.ReleaseMode)
-	s.router = gin.New()
+// addMiddleware adds standard middleware to the HTTP handler
+func (s *Server) addMiddleware(handler http.Handler) http.Handler {
+	// Logging middleware
+	handler = s.loggingMiddleware(handler)
 
-	// Middleware
-	s.router.Use(gin.Recovery())
-	s.router.Use(s.loggingMiddleware())
-	s.router.Use(s.corsMiddleware())
-	s.router.Use(s.securityMiddleware())
+	// CORS middleware
+	handler = s.corsMiddleware(handler)
 
-	// Health check
-	s.router.GET("/health", s.healthHandler)
+	// Security middleware
+	handler = s.securityMiddleware(handler)
 
-	// API v4 routes
-	apiV4 := s.router.Group("/api/v4")
-	{
-		apiV4.GET("/", s.apiInfoHandler)
-		apiV4.POST("/:entity/:action", s.apiHandler)
-		apiV4.GET("/:entity/:action", s.apiHandler)
-		apiV4.PUT("/:entity/:action", s.apiHandler)
-		apiV4.DELETE("/:entity/:action", s.apiHandler)
-	}
+	return handler
+}
 
-	// GraphQL endpoint
-	s.router.POST("/graphql", s.graphqlHandler)
-	s.router.GET("/graphql", s.graphqlPlaygroundHandler)
+// loggingMiddleware adds logging to all requests
+func (s *Server) loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
 
-	// Extension routes
-	s.router.GET("/extensions", s.extensionsHandler)
+		// Create a response writer wrapper to capture status code
+		wrapped := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 
-	// Create HTTP server
-	s.server = &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", s.config.Host, s.config.Port),
-		Handler:      s.router,
-		ReadTimeout:  s.config.ReadTimeout,
-		WriteTimeout: s.config.WriteTimeout,
-		IdleTimeout:  s.config.IdleTimeout,
-	}
+		next.ServeHTTP(wrapped, r)
 
-	return nil
+		duration := time.Since(start)
+		s.logger.Info("HTTP request",
+			"method", r.Method,
+			"path", r.URL.Path,
+			"status", wrapped.statusCode,
+			"duration", duration,
+			"user_agent", r.UserAgent(),
+		)
+	})
+}
+
+// corsMiddleware adds CORS headers
+func (s *Server) corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			w.Header().Set("Access-Control-Max-Age", "86400")
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		// Add CORS headers to all responses
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// securityMiddleware adds basic security headers
+func (s *Server) securityMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Add security headers
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 // Start starts the API server
@@ -101,176 +143,123 @@ func (s *Server) Start() error {
 	return nil
 }
 
-// Stop stops the API server
-func (s *Server) Stop() error {
+// Stop gracefully stops the API server
+func (s *Server) Stop(ctx context.Context) error {
 	s.logger.Info("Stopping API server")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
 	return s.server.Shutdown(ctx)
 }
 
-// loggingMiddleware adds logging to requests
-func (s *Server) loggingMiddleware() gin.HandlerFunc {
-	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		s.logger.Info("HTTP Request",
-			"method", param.Method,
-			"path", param.Path,
-			"status", param.StatusCode,
-			"latency", param.Latency,
-			"client_ip", param.ClientIP,
-		)
-		return ""
-	})
+// responseWriter wraps http.ResponseWriter to capture status code
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
 }
 
-// corsMiddleware handles CORS
-func (s *Server) corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "*")
-		c.Header("Access-Control-Allow-Credentials", "true")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-			return
-		}
-
-		c.Next()
-	}
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
 }
 
-// securityMiddleware handles authentication and authorization
-func (s *Server) securityMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Skip security for health check and public endpoints
-		if c.Request.URL.Path == "/health" || c.Request.URL.Path == "/graphql" {
-			c.Next()
-			return
-		}
-
-		// Extract token from Authorization header
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
-			c.Abort()
-			return
-		}
-
-		// Validate token
-		token := authHeader[7:] // Remove "Bearer " prefix
-		user, err := s.security.ValidateToken(token)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			c.Abort()
-			return
-		}
-
-		// Add user to context
-		c.Set("user", user)
-		c.Next()
-	}
+// ServerImpl implements the generated ServerInterface
+type ServerImpl struct {
+	server *Server
 }
 
-// healthHandler handles health check requests
-func (s *Server) healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"status":    "healthy",
-		"timestamp": time.Now().UTC(),
-		"version":   "1.0.0",
-	})
-}
-
-// apiInfoHandler provides API information
-func (s *Server) apiInfoHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"name":        "CiviCRM API v4",
-		"version":     "1.0.0",
-		"description": "CiviCRM API v4 implementation in Go",
-		"endpoints": gin.H{
-			"entities": []string{"Contact", "Event", "Contribution", "Activity"},
-			"actions":  []string{"get", "create", "update", "delete"},
-		},
-	})
-}
-
-// apiHandler handles API v4 requests
-func (s *Server) apiHandler(c *gin.Context) {
-	entity := c.Param("entity")
-	action := c.Param("action")
-
-	// Get user from context
-	user, exists := c.Get("user")
-	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found in context"})
-		return
+// ApiInfo returns API information
+func (s *ServerImpl) ApiInfo(w http.ResponseWriter, r *http.Request) {
+	info := APIInfo{
+		Version:     ptr("4.0.0"),
+		Name:        ptr("CiviCRM API v4"),
+		Description: ptr("CiviCRM REST API v4"),
+		Entities:    &[]string{"Contact", "Contribution", "Event", "Membership"},
 	}
 
-	// Check permissions
-	if !s.security.CheckPermission(c.Request.Context(), user.(*security.User), entity, action) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
-		return
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(info)
+}
+
+// ListExtensions returns list of loaded extensions
+func (s *ServerImpl) ListExtensions(w http.ResponseWriter, r *http.Request) {
+	// For now, return empty list - will be implemented when extensions are loaded
+	extensions := []Extension{}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(extensions)
+}
+
+// HealthCheck returns health status
+func (s *ServerImpl) HealthCheck(w http.ResponseWriter, r *http.Request) {
+	status := "healthy"
+	if s.server.db == nil {
+		status = "unhealthy"
 	}
 
-	// Parse request body
-	var params map[string]interface{}
-	if err := c.ShouldBindJSON(&params); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
+	health := HealthResponse{
+		Status:    (*HealthResponseStatus)(&status),
+		Timestamp: ptr(time.Now()),
+		Version:   ptr("4.0.0"),
+		Uptime:    ptr("0s"), // TODO: implement uptime tracking
 	}
 
-	// Execute API call
-	result, err := s.executeAPI(c.Request.Context(), entity, action, params)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(health)
+}
+
+// EntityDelete handles entity deletion
+func (s *ServerImpl) EntityDelete(w http.ResponseWriter, r *http.Request, entity string, action string, params EntityDeleteParams) {
+	// TODO: Implement entity deletion logic
+	response := APIResponse{
+		IsError: ptr(false),
+		Values:  &[]map[string]interface{}{},
+		Count:   ptr(0),
 	}
 
-	c.JSON(http.StatusOK, result)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
-// executeAPI executes an API call
-func (s *Server) executeAPI(ctx context.Context, entity, action string, params map[string]interface{}) (interface{}, error) {
-	// Check if this is handled by an extension
-	if apiService, exists := s.extensions.GetAPIService(entity); exists {
-		return apiService.Execute(ctx, action, params)
+// EntityGet handles entity retrieval
+func (s *ServerImpl) EntityGet(w http.ResponseWriter, r *http.Request, entity string, action string, params EntityGetParams) {
+	// TODO: Implement entity retrieval logic
+	response := APIResponse{
+		IsError: ptr(false),
+		Values:  &[]map[string]interface{}{},
+		Count:   ptr(0),
 	}
 
-	// Default API handling would go here
-	// For now, return a placeholder response
-	return gin.H{
-		"entity":  entity,
-		"action":  action,
-		"params":  params,
-		"message": "API call executed successfully",
-	}, nil
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
-// graphqlHandler handles GraphQL requests
-func (s *Server) graphqlHandler(c *gin.Context) {
-	// GraphQL implementation would go here
-	c.JSON(http.StatusOK, gin.H{
-		"message": "GraphQL endpoint - implementation pending",
-	})
+// EntityCreate handles entity creation
+func (s *ServerImpl) EntityCreate(w http.ResponseWriter, r *http.Request, entity string, action string) {
+	// TODO: Implement entity creation logic
+	response := APIResponse{
+		IsError: ptr(false),
+		Values:  &[]map[string]interface{}{},
+		Count:   ptr(0),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
 }
 
-// graphqlPlaygroundHandler serves GraphQL playground
-func (s *Server) graphqlPlaygroundHandler(c *gin.Context) {
-	// GraphQL playground implementation would go here
-	c.JSON(http.StatusOK, gin.H{
-		"message": "GraphQL playground - implementation pending",
-	})
+// EntityUpdate handles entity updates
+func (s *ServerImpl) EntityUpdate(w http.ResponseWriter, r *http.Request, entity string, action string, params EntityUpdateParams) {
+	// TODO: Implement entity update logic
+	response := APIResponse{
+		IsError: ptr(false),
+		Values:  &[]map[string]interface{}{},
+		Count:   ptr(0),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
-// extensionsHandler lists available extensions
-func (s *Server) extensionsHandler(c *gin.Context) {
-	extensions := s.extensions.ListExtensions()
-	apis := s.extensions.ListAPIServices()
-
-	c.JSON(http.StatusOK, gin.H{
-		"extensions": extensions,
-		"apis":       apis,
-	})
-}
+// Helper function for creating pointers to any type
+func ptr[T any](v T) *T { return &v }
