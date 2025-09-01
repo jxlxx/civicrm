@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sqlc-dev/pqtype"
 )
 
 type Activity struct {
@@ -780,6 +781,77 @@ type StateProvince struct {
 	IsActive     sql.NullBool   `json:"is_active"`
 	CreatedAt    sql.NullTime   `json:"created_at"`
 	UpdatedAt    sql.NullTime   `json:"updated_at"`
+}
+
+type Survey struct {
+	ID           uuid.UUID      `json:"id"`
+	Title        string         `json:"title"`
+	Description  sql.NullString `json:"description"`
+	Instructions sql.NullString `json:"instructions"`
+	ThankYouText sql.NullString `json:"thank_you_text"`
+	IsActive     sql.NullBool   `json:"is_active"`
+	IsDefault    sql.NullBool   `json:"is_default"`
+	CreatedDate  sql.NullTime   `json:"created_date"`
+	ModifiedDate sql.NullTime   `json:"modified_date"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	UpdatedAt    sql.NullTime   `json:"updated_at"`
+}
+
+type SurveyCampaign struct {
+	ID         uuid.UUID    `json:"id"`
+	SurveyID   uuid.UUID    `json:"survey_id"`
+	CampaignID uuid.UUID    `json:"campaign_id"`
+	IsActive   sql.NullBool `json:"is_active"`
+	CreatedAt  sql.NullTime `json:"created_at"`
+	UpdatedAt  sql.NullTime `json:"updated_at"`
+}
+
+type SurveyGroup struct {
+	ID        uuid.UUID    `json:"id"`
+	SurveyID  uuid.UUID    `json:"survey_id"`
+	GroupID   uuid.UUID    `json:"group_id"`
+	IsActive  sql.NullBool `json:"is_active"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
+type SurveyQuestion struct {
+	ID              uuid.UUID      `json:"id"`
+	SurveyID        uuid.UUID      `json:"survey_id"`
+	QuestionText    string         `json:"question_text"`
+	QuestionType    string         `json:"question_type"`
+	QuestionOptions sql.NullString `json:"question_options"`
+	IsRequired      sql.NullBool   `json:"is_required"`
+	Weight          sql.NullInt32  `json:"weight"`
+	HelpText        sql.NullString `json:"help_text"`
+	IsActive        sql.NullBool   `json:"is_active"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
+type SurveyResponse struct {
+	ID           uuid.UUID      `json:"id"`
+	SurveyID     uuid.UUID      `json:"survey_id"`
+	ContactID    uuid.UUID      `json:"contact_id"`
+	ResponseDate sql.NullTime   `json:"response_date"`
+	Status       sql.NullString `json:"status"`
+	IpAddress    pqtype.Inet    `json:"ip_address"`
+	UserAgent    sql.NullString `json:"user_agent"`
+	IsTest       sql.NullBool   `json:"is_test"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	UpdatedAt    sql.NullTime   `json:"updated_at"`
+}
+
+type SurveyResponseAnswer struct {
+	ID               uuid.UUID      `json:"id"`
+	SurveyResponseID uuid.UUID      `json:"survey_response_id"`
+	SurveyQuestionID uuid.UUID      `json:"survey_question_id"`
+	AnswerText       sql.NullString `json:"answer_text"`
+	AnswerNumeric    sql.NullString `json:"answer_numeric"`
+	AnswerDate       sql.NullTime   `json:"answer_date"`
+	AnswerBoolean    sql.NullBool   `json:"answer_boolean"`
+	CreatedAt        sql.NullTime   `json:"created_at"`
+	UpdatedAt        sql.NullTime   `json:"updated_at"`
 }
 
 type Tag struct {

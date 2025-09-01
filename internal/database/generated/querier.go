@@ -22,6 +22,10 @@ type Querier interface {
 	ActivateCaseType(ctx context.Context, id uuid.UUID) error
 	ActivateMembershipStatus(ctx context.Context, id uuid.UUID) error
 	ActivateMembershipType(ctx context.Context, id uuid.UUID) error
+	ActivateSurvey(ctx context.Context, id uuid.UUID) error
+	ActivateSurveyCampaign(ctx context.Context, id uuid.UUID) error
+	ActivateSurveyGroup(ctx context.Context, id uuid.UUID) error
+	ActivateSurveyQuestion(ctx context.Context, id uuid.UUID) error
 	ActivateTag(ctx context.Context, id uuid.UUID) error
 	ActivateTagSet(ctx context.Context, id uuid.UUID) error
 	CloseCase(ctx context.Context, arg CloseCaseParams) error
@@ -102,6 +106,12 @@ type Querier interface {
 	CreatePriceField(ctx context.Context, arg CreatePriceFieldParams) (PriceField, error)
 	CreatePriceFieldValue(ctx context.Context, arg CreatePriceFieldValueParams) (PriceFieldValue, error)
 	CreatePriceSet(ctx context.Context, arg CreatePriceSetParams) (PriceSet, error)
+	CreateSurvey(ctx context.Context, arg CreateSurveyParams) (Survey, error)
+	CreateSurveyCampaign(ctx context.Context, arg CreateSurveyCampaignParams) (SurveyCampaign, error)
+	CreateSurveyGroup(ctx context.Context, arg CreateSurveyGroupParams) (SurveyGroup, error)
+	CreateSurveyQuestion(ctx context.Context, arg CreateSurveyQuestionParams) (SurveyQuestion, error)
+	CreateSurveyResponse(ctx context.Context, arg CreateSurveyResponseParams) (SurveyResponse, error)
+	CreateSurveyResponseAnswer(ctx context.Context, arg CreateSurveyResponseAnswerParams) (SurveyResponseAnswer, error)
 	CreateTag(ctx context.Context, arg CreateTagParams) (Tag, error)
 	CreateTagSet(ctx context.Context, arg CreateTagSetParams) (TagSet, error)
 	DeactivateCampaign(ctx context.Context, id uuid.UUID) error
@@ -114,6 +124,10 @@ type Querier interface {
 	DeactivateCaseType(ctx context.Context, id uuid.UUID) error
 	DeactivateMembershipStatus(ctx context.Context, id uuid.UUID) error
 	DeactivateMembershipType(ctx context.Context, id uuid.UUID) error
+	DeactivateSurvey(ctx context.Context, id uuid.UUID) error
+	DeactivateSurveyCampaign(ctx context.Context, id uuid.UUID) error
+	DeactivateSurveyGroup(ctx context.Context, id uuid.UUID) error
+	DeactivateSurveyQuestion(ctx context.Context, id uuid.UUID) error
 	DeactivateTag(ctx context.Context, id uuid.UUID) error
 	DeactivateTagSet(ctx context.Context, id uuid.UUID) error
 	DeleteActivity(ctx context.Context, id uuid.UUID) error
@@ -153,6 +167,13 @@ type Querier interface {
 	DeletePriceField(ctx context.Context, id uuid.UUID) error
 	DeletePriceFieldValue(ctx context.Context, id uuid.UUID) error
 	DeletePriceSet(ctx context.Context, id uuid.UUID) error
+	DeleteSurvey(ctx context.Context, id uuid.UUID) error
+	DeleteSurveyCampaign(ctx context.Context, id uuid.UUID) error
+	DeleteSurveyGroup(ctx context.Context, id uuid.UUID) error
+	DeleteSurveyQuestion(ctx context.Context, id uuid.UUID) error
+	DeleteSurveyResponse(ctx context.Context, id uuid.UUID) error
+	DeleteSurveyResponseAnswer(ctx context.Context, id uuid.UUID) error
+	DeleteSurveyResponseAnswersByResponse(ctx context.Context, surveyResponseID uuid.UUID) error
 	DeleteTag(ctx context.Context, id uuid.UUID) error
 	DeleteTagSet(ctx context.Context, id uuid.UUID) error
 	ExtendMembership(ctx context.Context, arg ExtendMembershipParams) error
@@ -161,6 +182,9 @@ type Querier interface {
 	GetActiveCaseContacts(ctx context.Context, caseID uuid.UUID) ([]CaseContact, error)
 	GetActiveEventFees(ctx context.Context) ([]EventFee, error)
 	GetActiveMembershipByContact(ctx context.Context, contactID uuid.UUID) (Membership, error)
+	GetActiveSurveyCampaigns(ctx context.Context, surveyID uuid.UUID) ([]SurveyCampaign, error)
+	GetActiveSurveyGroups(ctx context.Context, surveyID uuid.UUID) ([]SurveyGroup, error)
+	GetActiveSurveyQuestionsBySurvey(ctx context.Context, surveyID uuid.UUID) ([]SurveyQuestion, error)
 	GetActivitiesByCampaign(ctx context.Context, campaignID uuid.NullUUID) ([]Activity, error)
 	GetActivitiesByContact(ctx context.Context, contactID uuid.UUID) ([]Activity, error)
 	GetActivitiesByDateRange(ctx context.Context, arg GetActivitiesByDateRangeParams) ([]Activity, error)
@@ -250,6 +274,7 @@ type Querier interface {
 	GetCaseTypeByName(ctx context.Context, name string) (CaseType, error)
 	GetCaseTypeStats(ctx context.Context, isActive sql.NullBool) ([]GetCaseTypeStatsRow, error)
 	GetCaseWithDetails(ctx context.Context, id uuid.UUID) (GetCaseWithDetailsRow, error)
+	GetCompletedSurveyResponses(ctx context.Context, surveyID uuid.UUID) ([]SurveyResponse, error)
 	GetContact(ctx context.Context, id uuid.UUID) (Contact, error)
 	GetContactByEmail(ctx context.Context, email sql.NullString) (Contact, error)
 	GetContactByPhone(ctx context.Context, phone sql.NullString) (Contact, error)
@@ -259,6 +284,7 @@ type Querier interface {
 	GetContributionsByContact(ctx context.Context, contactID uuid.UUID) ([]Contribution, error)
 	GetContributionsByDateRange(ctx context.Context, arg GetContributionsByDateRangeParams) ([]GetContributionsByDateRangeRow, error)
 	GetDefaultEventFee(ctx context.Context, eventID uuid.UUID) (EventFee, error)
+	GetDefaultSurvey(ctx context.Context) (Survey, error)
 	GetDiscount(ctx context.Context, id uuid.UUID) (Discount, error)
 	GetDiscountByName(ctx context.Context, name string) (Discount, error)
 	GetEntityTag(ctx context.Context, id uuid.UUID) (EntityTag, error)
@@ -319,6 +345,44 @@ type Querier interface {
 	GetPriceSetByTitle(ctx context.Context, title string) (PriceSet, error)
 	GetRegistrationsByContact(ctx context.Context, contactID uuid.UUID) ([]GetRegistrationsByContactRow, error)
 	GetRegistrationsByEvent(ctx context.Context, eventID uuid.UUID) ([]GetRegistrationsByEventRow, error)
+	GetRequiredSurveyQuestions(ctx context.Context, arg GetRequiredSurveyQuestionsParams) ([]SurveyQuestion, error)
+	GetSurvey(ctx context.Context, id uuid.UUID) (Survey, error)
+	GetSurveyAnalytics(ctx context.Context, surveyID uuid.UUID) ([]GetSurveyAnalyticsRow, error)
+	GetSurveyByTitle(ctx context.Context, title string) (Survey, error)
+	GetSurveyCampaign(ctx context.Context, id uuid.UUID) (SurveyCampaign, error)
+	GetSurveyCampaignBySurveyAndCampaign(ctx context.Context, arg GetSurveyCampaignBySurveyAndCampaignParams) (SurveyCampaign, error)
+	GetSurveyCampaignStats(ctx context.Context, isActive sql.NullBool) ([]GetSurveyCampaignStatsRow, error)
+	GetSurveyCampaignSummary(ctx context.Context, isActive sql.NullBool) ([]GetSurveyCampaignSummaryRow, error)
+	GetSurveyCampaignsByCampaign(ctx context.Context, campaignID uuid.UUID) ([]SurveyCampaign, error)
+	GetSurveyCampaignsBySurvey(ctx context.Context, surveyID uuid.UUID) ([]SurveyCampaign, error)
+	GetSurveyGroup(ctx context.Context, id uuid.UUID) (SurveyGroup, error)
+	GetSurveyGroupBySurveyAndGroup(ctx context.Context, arg GetSurveyGroupBySurveyAndGroupParams) (SurveyGroup, error)
+	GetSurveyGroupStats(ctx context.Context, isActive sql.NullBool) ([]GetSurveyGroupStatsRow, error)
+	GetSurveyGroupsByGroup(ctx context.Context, groupID uuid.UUID) ([]SurveyGroup, error)
+	GetSurveyGroupsBySurvey(ctx context.Context, surveyID uuid.UUID) ([]SurveyGroup, error)
+	GetSurveyQuestion(ctx context.Context, id uuid.UUID) (SurveyQuestion, error)
+	GetSurveyQuestionStats(ctx context.Context, arg GetSurveyQuestionStatsParams) ([]GetSurveyQuestionStatsRow, error)
+	GetSurveyQuestionSummary(ctx context.Context, isActive sql.NullBool) ([]GetSurveyQuestionSummaryRow, error)
+	GetSurveyQuestionsBySurvey(ctx context.Context, arg GetSurveyQuestionsBySurveyParams) ([]SurveyQuestion, error)
+	GetSurveyQuestionsByType(ctx context.Context, arg GetSurveyQuestionsByTypeParams) ([]SurveyQuestion, error)
+	GetSurveyResponse(ctx context.Context, id uuid.UUID) (SurveyResponse, error)
+	GetSurveyResponseAnswer(ctx context.Context, id uuid.UUID) (SurveyResponseAnswer, error)
+	GetSurveyResponseAnswerCount(ctx context.Context, surveyResponseID uuid.UUID) (int64, error)
+	GetSurveyResponseAnswerStats(ctx context.Context, surveyResponseID uuid.UUID) ([]GetSurveyResponseAnswerStatsRow, error)
+	GetSurveyResponseAnswersByQuestion(ctx context.Context, surveyQuestionID uuid.UUID) ([]SurveyResponseAnswer, error)
+	GetSurveyResponseAnswersByResponse(ctx context.Context, surveyResponseID uuid.UUID) ([]SurveyResponseAnswer, error)
+	GetSurveyResponseAnswersWithDetails(ctx context.Context, surveyResponseID uuid.UUID) ([]GetSurveyResponseAnswersWithDetailsRow, error)
+	GetSurveyResponseBySurveyAndContact(ctx context.Context, arg GetSurveyResponseBySurveyAndContactParams) (SurveyResponse, error)
+	GetSurveyResponseCount(ctx context.Context, surveyID uuid.UUID) (int64, error)
+	GetSurveyResponseRate(ctx context.Context, isActive sql.NullBool) ([]GetSurveyResponseRateRow, error)
+	GetSurveyResponseStats(ctx context.Context, surveyID uuid.UUID) ([]GetSurveyResponseStatsRow, error)
+	GetSurveyResponseSummary(ctx context.Context, surveyID uuid.UUID) ([]GetSurveyResponseSummaryRow, error)
+	GetSurveyResponseTrends(ctx context.Context, arg GetSurveyResponseTrendsParams) ([]GetSurveyResponseTrendsRow, error)
+	GetSurveyResponsesByContact(ctx context.Context, contactID uuid.UUID) ([]SurveyResponse, error)
+	GetSurveyResponsesByStatus(ctx context.Context, arg GetSurveyResponsesByStatusParams) ([]SurveyResponse, error)
+	GetSurveyResponsesBySurvey(ctx context.Context, surveyID uuid.UUID) ([]SurveyResponse, error)
+	GetSurveyStats(ctx context.Context, isActive sql.NullBool) ([]GetSurveyStatsRow, error)
+	GetSurveyTargetAudience(ctx context.Context, isActive sql.NullBool) ([]GetSurveyTargetAudienceRow, error)
 	GetTag(ctx context.Context, id uuid.UUID) (Tag, error)
 	GetTagByName(ctx context.Context, name string) (Tag, error)
 	GetTagSet(ctx context.Context, id uuid.UUID) (TagSet, error)
@@ -354,6 +418,10 @@ type Querier interface {
 	ListActivePriceFieldValues(ctx context.Context) ([]PriceFieldValue, error)
 	ListActivePriceFields(ctx context.Context) ([]PriceField, error)
 	ListActivePriceSets(ctx context.Context) ([]PriceSet, error)
+	ListActiveSurveyCampaigns(ctx context.Context) ([]SurveyCampaign, error)
+	ListActiveSurveyGroups(ctx context.Context) ([]SurveyGroup, error)
+	ListActiveSurveyQuestions(ctx context.Context) ([]SurveyQuestion, error)
+	ListActiveSurveys(ctx context.Context) ([]Survey, error)
 	ListActiveTagSets(ctx context.Context) ([]TagSet, error)
 	ListActiveTags(ctx context.Context) ([]Tag, error)
 	ListActivityTypes(ctx context.Context) ([]ActivityType, error)
@@ -463,12 +531,26 @@ type Querier interface {
 	ListReservedCaseTypes(ctx context.Context, isActive sql.NullBool) ([]CaseType, error)
 	ListReservedTagSets(ctx context.Context, isActive sql.NullBool) ([]TagSet, error)
 	ListReservedTags(ctx context.Context, isActive sql.NullBool) ([]Tag, error)
+	ListSurveyCampaigns(ctx context.Context) ([]SurveyCampaign, error)
+	ListSurveyGroups(ctx context.Context) ([]SurveyGroup, error)
+	ListSurveyQuestions(ctx context.Context) ([]SurveyQuestion, error)
+	ListSurveyQuestionsByType(ctx context.Context, arg ListSurveyQuestionsByTypeParams) ([]SurveyQuestion, error)
+	ListSurveyResponseAnswers(ctx context.Context) ([]SurveyResponseAnswer, error)
+	ListSurveyResponseAnswersByQuestionType(ctx context.Context, questionType string) ([]SurveyResponseAnswer, error)
+	ListSurveyResponses(ctx context.Context) ([]SurveyResponse, error)
+	ListSurveyResponsesByDateRange(ctx context.Context, arg ListSurveyResponsesByDateRangeParams) ([]SurveyResponse, error)
+	ListSurveys(ctx context.Context) ([]Survey, error)
+	ListSurveysByDateRange(ctx context.Context, arg ListSurveysByDateRangeParams) ([]Survey, error)
 	ListTagSets(ctx context.Context, isActive sql.NullBool) ([]TagSet, error)
 	ListTags(ctx context.Context, isActive sql.NullBool) ([]Tag, error)
 	ListTagsByColor(ctx context.Context, arg ListTagsByColorParams) ([]Tag, error)
 	ListTargetActivityTypes(ctx context.Context) ([]ActivityType, error)
 	ListTestParticipants(ctx context.Context, isTest sql.NullBool) ([]Participant, error)
+	ListTestSurveyResponses(ctx context.Context, isTest sql.NullBool) ([]SurveyResponse, error)
 	ListUpcomingEvents(ctx context.Context, arg ListUpcomingEventsParams) ([]Event, error)
+	MarkSurveyResponseAbandoned(ctx context.Context, id uuid.UUID) error
+	MarkSurveyResponseCompleted(ctx context.Context, id uuid.UUID) error
+	MarkSurveyResponsePartial(ctx context.Context, id uuid.UUID) error
 	SearchActivities(ctx context.Context, subject sql.NullString) ([]Activity, error)
 	SearchActivityContacts(ctx context.Context, role sql.NullString) ([]ActivityContact, error)
 	SearchActivityTypes(ctx context.Context, name string) ([]ActivityType, error)
@@ -502,8 +584,15 @@ type Querier interface {
 	SearchPriceFieldValues(ctx context.Context, arg SearchPriceFieldValuesParams) ([]PriceFieldValue, error)
 	SearchPriceFields(ctx context.Context, arg SearchPriceFieldsParams) ([]PriceField, error)
 	SearchPriceSets(ctx context.Context, arg SearchPriceSetsParams) ([]PriceSet, error)
+	SearchSurveyCampaigns(ctx context.Context, title string) ([]SurveyCampaign, error)
+	SearchSurveyGroups(ctx context.Context, title string) ([]SurveyGroup, error)
+	SearchSurveyQuestions(ctx context.Context, arg SearchSurveyQuestionsParams) ([]SurveyQuestion, error)
+	SearchSurveyResponseAnswers(ctx context.Context, questionText string) ([]SurveyResponseAnswer, error)
+	SearchSurveyResponses(ctx context.Context, firstName sql.NullString) ([]SurveyResponse, error)
+	SearchSurveys(ctx context.Context, title string) ([]Survey, error)
 	SearchTagSets(ctx context.Context, arg SearchTagSetsParams) ([]TagSet, error)
 	SearchTags(ctx context.Context, arg SearchTagsParams) ([]Tag, error)
+	SetDefaultSurvey(ctx context.Context) error
 	UpdateActivity(ctx context.Context, arg UpdateActivityParams) (Activity, error)
 	UpdateActivityContact(ctx context.Context, arg UpdateActivityContactParams) (ActivityContact, error)
 	UpdateActivityType(ctx context.Context, arg UpdateActivityTypeParams) (ActivityType, error)
@@ -553,6 +642,14 @@ type Querier interface {
 	UpdatePriceField(ctx context.Context, arg UpdatePriceFieldParams) (PriceField, error)
 	UpdatePriceFieldValue(ctx context.Context, arg UpdatePriceFieldValueParams) (PriceFieldValue, error)
 	UpdatePriceSet(ctx context.Context, arg UpdatePriceSetParams) (PriceSet, error)
+	UpdateSurvey(ctx context.Context, arg UpdateSurveyParams) (Survey, error)
+	UpdateSurveyCampaign(ctx context.Context, arg UpdateSurveyCampaignParams) (SurveyCampaign, error)
+	UpdateSurveyGroup(ctx context.Context, arg UpdateSurveyGroupParams) (SurveyGroup, error)
+	UpdateSurveyQuestion(ctx context.Context, arg UpdateSurveyQuestionParams) (SurveyQuestion, error)
+	UpdateSurveyQuestionWeight(ctx context.Context, arg UpdateSurveyQuestionWeightParams) error
+	UpdateSurveyResponse(ctx context.Context, arg UpdateSurveyResponseParams) (SurveyResponse, error)
+	UpdateSurveyResponseAnswer(ctx context.Context, arg UpdateSurveyResponseAnswerParams) (SurveyResponseAnswer, error)
+	UpdateSurveyResponseStatus(ctx context.Context, arg UpdateSurveyResponseStatusParams) error
 	UpdateTag(ctx context.Context, arg UpdateTagParams) (Tag, error)
 	UpdateTagColor(ctx context.Context, arg UpdateTagColorParams) error
 	UpdateTagSet(ctx context.Context, arg UpdateTagSetParams) (TagSet, error)
