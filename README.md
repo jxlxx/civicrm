@@ -6,31 +6,31 @@ A modern, high-performance implementation of CiviCRM built in Go.
 
 This implementation follows a clean, modular architecture with the following key components:
 
-### Core Infrastructure (`pkg/core/`)
+### Core Infrastructure (`internal/core/`)
 - **Application Framework** - Main application structure and lifecycle
 - **Configuration Management** - Environment-based configuration
 - **Dependency Injection** - Service container and dependency management
 - **Logging & Monitoring** - Structured logging and observability
 
-### API Layer (`pkg/api/`)
+### API Layer (`internal/api/`)
 - **REST API** - HTTP/2 RESTful endpoints
 - **GraphQL** - GraphQL API for complex queries
 - **gRPC** - High-performance internal service communication
 - **API v4 Compatibility** - Maintains compatibility with existing CiviCRM API v4
 
-### Extension System (`pkg/extensions/`)
+### Extension System (`internal/extensions/`)
 - **Plugin Architecture** - Runtime extension loading
 - **Hook System** - Event-driven extension points
 - **API Registration** - Extensions can add new API endpoints
 - **Dependency Management** - Extension dependency resolution
 
-### Database Layer (`pkg/database/`)
+### Database Layer (`internal/database/`)
 - **Multi-Database Support** - PostgreSQL, MySQL, SQLite
 - **Connection Pooling** - Efficient connection management
 - **Migration System** - Versioned schema changes
 - **ORM Layer** - Type-safe data mapping
 
-### Security (`pkg/security/`)
+### Security (`internal/security/`)
 - **Authentication** - JWT-based authentication
 - **Authorization** - Role-based access control (RBAC)
 - **Encryption** - Field-level encryption for sensitive data
@@ -99,14 +99,13 @@ The application uses environment-based configuration. Key configuration options:
 ```
 civicrm/
 ├── cmd/                    # Application entry points
-├── pkg/                    # Core packages
+├── internal/               # Internal packages (private)
 │   ├── api/               # API layer
 │   ├── core/              # Core framework
 │   ├── database/          # Database layer
 │   ├── extensions/        # Extension system
 │   ├── security/          # Security components
 │   └── cache/             # Caching layer
-├── internal/               # Internal packages
 ├── config/                 # Configuration files
 ├── migrations/             # Database migrations
 ├── tests/                  # Test files

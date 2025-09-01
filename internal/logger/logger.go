@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/jxlxx/civicrm/pkg/config"
+	"github.com/jxlxx/civicrm/internal/config"
 	"go.uber.org/zap"
 )
 

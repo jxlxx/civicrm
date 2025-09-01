@@ -7,8 +7,8 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jxlxx/civicrm/pkg/config"
-	"github.com/jxlxx/civicrm/pkg/logger"
+	"github.com/jxlxx/civicrm/internal/config"
+	"github.com/jxlxx/civicrm/internal/logger"
 	_ "github.com/lib/pq"
 )
 

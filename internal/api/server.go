@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jxlxx/civicrm/pkg/cache"
-	"github.com/jxlxx/civicrm/pkg/config"
-	"github.com/jxlxx/civicrm/pkg/database"
-	"github.com/jxlxx/civicrm/pkg/extensions"
-	"github.com/jxlxx/civicrm/pkg/logger"
-	"github.com/jxlxx/civicrm/pkg/security"
+	"github.com/jxlxx/civicrm/internal/cache"
+	"github.com/jxlxx/civicrm/internal/config"
+	"github.com/jxlxx/civicrm/internal/database"
+	"github.com/jxlxx/civicrm/internal/extensions"
+	"github.com/jxlxx/civicrm/internal/logger"
+	"github.com/jxlxx/civicrm/internal/security"
 )
 
 // Server represents the API server

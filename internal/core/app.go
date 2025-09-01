@@ -7,13 +7,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jxlxx/civicrm/pkg/api"
-	"github.com/jxlxx/civicrm/pkg/cache"
-	"github.com/jxlxx/civicrm/pkg/config"
-	"github.com/jxlxx/civicrm/pkg/database"
-	"github.com/jxlxx/civicrm/pkg/extensions"
-	"github.com/jxlxx/civicrm/pkg/logger"
-	"github.com/jxlxx/civicrm/pkg/security"
+	"github.com/jxlxx/civicrm/internal/api"
+	"github.com/jxlxx/civicrm/internal/cache"
+	"github.com/jxlxx/civicrm/internal/config"
+	"github.com/jxlxx/civicrm/internal/database"
+	"github.com/jxlxx/civicrm/internal/extensions"
+	"github.com/jxlxx/civicrm/internal/logger"
+	"github.com/jxlxx/civicrm/internal/security"
 	"go.uber.org/zap"
 )
 

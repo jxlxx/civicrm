@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jxlxx/civicrm/pkg/config"
-	"github.com/jxlxx/civicrm/pkg/logger"
+	"github.com/jxlxx/civicrm/internal/config"
+	"github.com/jxlxx/civicrm/internal/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 

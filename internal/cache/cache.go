@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jxlxx/civicrm/pkg/config"
-	"github.com/jxlxx/civicrm/pkg/logger"
+	"github.com/jxlxx/civicrm/internal/config"
+	"github.com/jxlxx/civicrm/internal/logger"
 	"github.com/redis/go-redis/v9"
 )
 

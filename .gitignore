@@ -25,6 +25,12 @@ go.work
 
 # Configuration files with sensitive data
 config/config.yaml
+config/config.development.yaml
+config/config.production.yaml
+config/config.testing.yaml
+config/config.local.yaml
+config/config.staging.yaml
+config/config.demo.yaml
 config/*.key
 config/*.pem
 

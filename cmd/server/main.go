@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jxlxx/civicrm/pkg/core"
+	"github.com/jxlxx/civicrm/internal/core"
 )
 
 func main() {
