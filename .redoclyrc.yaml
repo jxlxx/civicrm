@@ -1,0 +1,128 @@
+# Redocly configuration for CiviCRM API
+# https://redocly.com/docs/cli/configuration/
+
+# API configuration
+api:
+  # API title and version
+  title: "CiviCRM API v4"
+  version: "4.0.0"
+  
+  # API description
+  description: |
+    # CiviCRM REST API v4
+    
+    Welcome to the CiviCRM API v4! This API provides comprehensive access to all CiviCRM entities and operations.
+    
+    ## Getting Started
+    
+    1. **Authentication**: Use JWT Bearer tokens for API access
+    2. **Base URL**: All endpoints are relative to `/api/v4`
+    3. **Entity Operations**: Use `/{entity}/{action}` pattern (e.g., `/Contact/get`)
+    4. **Response Format**: All responses follow the standard CiviCRM format
+    
+    ## Quick Examples
+    
+    ```bash
+    # Get all contacts
+    GET /api/v4/Contact/get
+    
+    # Create a new contact
+    POST /api/v4/Contact/create
+    {
+      "values": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "john.doe@example.com"
+      }
+    }
+    
+    # Get specific contact
+    GET /api/v4/Contact/get?id=123
+    ```
+
+# UI customization
+ui:
+  # Theme colors
+  theme:
+    colors:
+      primary:
+        main: "#2E7D32"  # CiviCRM green
+      text:
+        primary: "#2C3E50"
+        secondary: "#7F8C8D"
+      gray:
+        50: "#F8F9FA"
+        100: "#E9ECEF"
+  
+  # Typography
+  typography:
+    fontSize: "14px"
+    lineHeight: "1.5"
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+  
+  # Layout
+  layout:
+    rightPanel:
+      width: "40%"
+    menu:
+      width: "260px"
+  
+  # Code samples
+  codeSample:
+    languages:
+      - curl
+      - bash
+      - javascript
+      - python
+      - php
+
+# Features
+features:
+  # Enable/disable features
+  examples: true
+  tryItButton: true
+  search: true
+  hideDownloadButton: false
+  hideHostname: false
+  hideInfoSection: false
+  hideSchemaPattern: false
+  hideSingleRequestSampleTab: false
+  hideSecuritySection: false
+  hideRequestPayloadSample: false
+  hideResponseCodeSamples: false
+  hideResponseHeaders: false
+  hideResponsePayloadSample: false
+  hideSchemaTitles: false
+  hideSingleRequestSampleTab: false
+  hideTryItButton: false
+  hideUrl: false
+  hideHostname: false
+  hideInfoSection: false
+  hideSchemaPattern: false
+  hideSingleRequestSampleTab: false
+  hideSecuritySection: false
+  hideRequestPayloadSample: false
+  hideResponseCodeSamples: false
+  hideResponseHeaders: false
+  hideResponsePayloadSample: false
+  hideSchemaTitles: false
+  hideSingleRequestSampleTab: false
+  hideTryItButton: false
+  hideUrl: false
+
+# Security
+security:
+  # Security schemes
+  schemes:
+    - type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+      description: "JWT Bearer token for authentication"
+
+# Linting rules
+lint:
+  rules:
+    # Disable some strict rules for development
+    no-empty-servers: off
+    no-unused-components: off
+    no-unused-schemas: off

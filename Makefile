@@ -1,6 +1,6 @@
 # CiviCRM Go Makefile
 
-.PHONY: help build run test clean deps lint format migrate migrate-new migrate-rollback migrate-status install-tern up down logs
+.PHONY: help build run test clean deps lint format migrate migrate-new migrate-rollback migrate-status install-tern up down logs generate-api
 
 # Default target
 help:
@@ -19,17 +19,39 @@ help:
 	@echo "  migrate-test - Run test database migrations"
 	@echo "  migrate-test-status - Show test migration status"
 	@echo "  install-tern - Install Tern migration tool"
-	@echo "  up        - Start development services (PostgreSQL, Redis)"
+	@echo "  up        - Start development services (PostgreSQL, Redis, pgAdmin, Redocly)"
 	@echo "  down      - Stop development services"
 	@echo "  logs      - Show development service logs"
 	@echo "  docker    - Build Docker image"
 	@echo "  install   - Install the application"
+	@echo "  generate-api - Generate Go code from OpenAPI spec"
+	@echo "  install-oapi - Install oapi-codegen tool"
+	@echo "  watch-api   - Watch OpenAPI spec and regenerate code"
+	@echo "  docs        - Serve API documentation with Redocly"
+	@echo "  docs-python - Serve API documentation with Python (fallback)"
+	@echo "  install-redocly - Install Redocly CLI tool"
 
 # Install Tern migration tool
 install-tern:
 	@echo "Installing Tern migration tool..."
 	go install github.com/jackc/tern/v2/cmd/tern@latest
 	@echo "Tern installation complete"
+
+# Install oapi-codegen tool
+install-oapi:
+	@echo "Installing oapi-codegen tool..."
+	go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
+	@echo "oapi-codegen installation complete"
+
+# Generate Go code from OpenAPI specification
+generate-api:
+	@echo "Generating Go code from OpenAPI specification..."
+	@if [ ! -f api/openapi.yaml ]; then \
+		echo "Error: api/openapi.yaml not found"; \
+		exit 1; \
+	fi
+	oapi-codegen --config api/oapi-codegen-config.yaml api/openapi.yaml
+	@echo "API code generation complete: internal/api/generated.go"
 
 # Start development services
 up:
@@ -155,6 +177,8 @@ deps:
 	@echo "Downloading dependencies..."
 	go mod download
 	go mod tidy
+	@echo "Generating API code..."
+	@$(MAKE) generate-api
 
 # Run linter
 lint:
@@ -193,6 +217,39 @@ dev-setup: deps
 
 # Quick start for development
 dev: dev-setup run
+
+# Watch OpenAPI spec and regenerate code (requires fswatch)
+watch-api:
+	@echo "Watching OpenAPI specification for changes..."
+	@if command -v fswatch > /dev/null 2>&1; then \
+		fswatch -o api/openapi.yaml | xargs -n1 -I{} make generate-api; \
+	else \
+		echo "fswatch not found. Install with: brew install fswatch (macOS) or apt-get install fswatch (Ubuntu)"; \
+		echo "Alternatively, run 'make generate-api' manually when you change the OpenAPI spec"; \
+	fi
+
+# Install Redocly CLI tool
+install-redocly:
+	@echo "Installing Redocly CLI tool..."
+	npm install -g @redocly/cli
+	@echo "Redocly CLI installation complete"
+
+# Serve API documentation with Redocly
+docs:
+	@echo "Starting Redocly documentation server..."
+	@if command -v redocly > /dev/null 2>&1; then \
+		redocly serve api/openapi.yaml --port 8082; \
+	else \
+		echo "Redocly CLI not found. Install with: make install-redocly"; \
+		echo "Alternatively, use Docker: make up (includes Redocly container)"; \
+		exit 1; \
+	fi
+
+# Serve API documentation with Python (fallback)
+docs-python:
+	@echo "Starting Python HTTP server for API documentation..."
+	@echo "Open http://localhost:8082/docs.html in your browser"
+	cd api && python3 -m http.server 8082
 
 # Build for specific platform
 build-linux:

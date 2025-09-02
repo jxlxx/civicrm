@@ -81,3 +81,7 @@ extensions/*/
 
 # Cache
 .cache/
+
+# Generated API documentation
+internal/api/generated.go
+api/docs.html
