@@ -327,8 +327,8 @@ ORDER BY ufj.weight ASC, ufg.title ASC
 `
 
 type GetUFGroupsByEntityParams struct {
-	EntityTable string        `json:"entity_table"`
-	EntityID    uuid.NullUUID `json:"entity_id"`
+	EntityTable string    `json:"entity_table"`
+	EntityID    uuid.UUID `json:"entity_id"`
 }
 
 func (q *Queries) GetUFGroupsByEntity(ctx context.Context, arg GetUFGroupsByEntityParams) ([]UfGroup, error) {

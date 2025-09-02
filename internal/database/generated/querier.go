@@ -7,6 +7,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -65,10 +66,13 @@ type Querier interface {
 	CountActivityTypes(ctx context.Context) (int64, error)
 	CountAllContacts(ctx context.Context) (int64, error)
 	CountContacts(ctx context.Context, contactType string) (int64, error)
+	CountContactsByOptOutStatus(ctx context.Context) (CountContactsByOptOutStatusRow, error)
 	CountContributions(ctx context.Context) (int64, error)
 	CountContributionsByContact(ctx context.Context, contactID uuid.UUID) (int64, error)
 	CountContributionsByStatus(ctx context.Context, status sql.NullString) (int64, error)
 	CountContributionsByType(ctx context.Context, contributionType sql.NullString) (int64, error)
+	CountCustomFieldsByGroup(ctx context.Context, arg CountCustomFieldsByGroupParams) (int64, error)
+	CountCustomValuesByEntity(ctx context.Context, arg CountCustomValuesByEntityParams) (int64, error)
 	CountDiscounts(ctx context.Context, isActive sql.NullBool) (int64, error)
 	CountDomains(ctx context.Context) (int64, error)
 	CountEventFees(ctx context.Context) (int64, error)
@@ -86,6 +90,7 @@ type Querier interface {
 	CountParticipantsByContact(ctx context.Context, contactID uuid.UUID) (int64, error)
 	CountParticipantsByEvent(ctx context.Context, eventID uuid.UUID) (int64, error)
 	CountParticipantsByStatus(ctx context.Context, statusID uuid.UUID) (int64, error)
+	CountPledgesByStatus(ctx context.Context, campaignID uuid.NullUUID) (CountPledgesByStatusRow, error)
 	CountPriceFieldValues(ctx context.Context, priceFieldID uuid.UUID) (int64, error)
 	CountPriceFieldValuesByFinancialType(ctx context.Context, arg CountPriceFieldValuesByFinancialTypeParams) (int64, error)
 	CountPriceFields(ctx context.Context, priceSetID uuid.UUID) (int64, error)
@@ -133,8 +138,20 @@ type Querier interface {
 	CreateCaseContact(ctx context.Context, arg CreateCaseContactParams) (CaseContact, error)
 	CreateCaseStatus(ctx context.Context, arg CreateCaseStatusParams) (CaseStatus, error)
 	CreateCaseType(ctx context.Context, arg CreateCaseTypeParams) (CaseType, error)
+	// Communication Preferences CRUD operations
+	CreateCommunicationPreferences(ctx context.Context, arg CreateCommunicationPreferencesParams) (CommunicationPreference, error)
 	CreateContact(ctx context.Context, arg CreateContactParams) (Contact, error)
 	CreateContribution(ctx context.Context, arg CreateContributionParams) (Contribution, error)
+	// Custom Fields CRUD operations
+	CreateCustomField(ctx context.Context, arg CreateCustomFieldParams) (CustomField, error)
+	// Custom Field Options CRUD operations
+	CreateCustomFieldOption(ctx context.Context, arg CreateCustomFieldOptionParams) (CustomFieldOption, error)
+	// Custom Fields Queries
+	// Provides CRUD operations and specialized queries for the custom fields system
+	// Custom Groups CRUD operations
+	CreateCustomGroup(ctx context.Context, arg CreateCustomGroupParams) (CustomGroup, error)
+	// Custom Values CRUD operations
+	CreateCustomValue(ctx context.Context, arg CreateCustomValueParams) (CustomValue, error)
 	CreateDashboard(ctx context.Context, arg CreateDashboardParams) (Dashboard, error)
 	CreateDashboardWidget(ctx context.Context, arg CreateDashboardWidgetParams) (DashboardWidget, error)
 	CreateDiscount(ctx context.Context, arg CreateDiscountParams) (Discount, error)
@@ -146,13 +163,42 @@ type Querier interface {
 	CreateFinancialAccount(ctx context.Context, arg CreateFinancialAccountParams) (FinancialAccount, error)
 	CreateJob(ctx context.Context, arg CreateJobParams) (Job, error)
 	CreateLineItem(ctx context.Context, arg CreateLineItemParams) (LineItem, error)
+	// Mailings CRUD operations
+	CreateMailing(ctx context.Context, arg CreateMailingParams) (Mailing, error)
+	// Mailing Lists CRUD operations
+	CreateMailingList(ctx context.Context, arg CreateMailingListParams) (MailingList, error)
+	// Mailing List Subscriptions CRUD operations
+	CreateMailingListSubscription(ctx context.Context, arg CreateMailingListSubscriptionParams) (MailingListSubscription, error)
+	CreateMailingOpen(ctx context.Context, arg CreateMailingOpenParams) (MailingOpen, error)
+	// Mailing Recipients CRUD operations
+	CreateMailingRecipient(ctx context.Context, arg CreateMailingRecipientParams) (MailingRecipient, error)
 	CreateMembership(ctx context.Context, arg CreateMembershipParams) (Membership, error)
 	CreateMembershipLog(ctx context.Context, arg CreateMembershipLogParams) (MembershipLog, error)
 	CreateMembershipPayment(ctx context.Context, arg CreateMembershipPaymentParams) (MembershipPayment, error)
 	CreateMembershipStatus(ctx context.Context, arg CreateMembershipStatusParams) (MembershipStatus, error)
 	CreateMembershipType(ctx context.Context, arg CreateMembershipTypeParams) (MembershipType, error)
+	// Communication System Queries
+	// Provides CRUD operations and specialized queries for message templates, mailings, and tracking
+	// Message Templates CRUD operations
+	CreateMessageTemplate(ctx context.Context, arg CreateMessageTemplateParams) (MessageTemplate, error)
 	CreateNavigation(ctx context.Context, arg CreateNavigationParams) (Navigation, error)
 	CreateParticipant(ctx context.Context, arg CreateParticipantParams) (Participant, error)
+	// Pledges CRUD operations
+	CreatePledge(ctx context.Context, arg CreatePledgeParams) (Pledge, error)
+	// Pledge System Queries
+	// Provides CRUD operations and specialized queries for pledge management
+	// Pledge Blocks CRUD operations
+	CreatePledgeBlock(ctx context.Context, arg CreatePledgeBlockParams) (PledgeBlock, error)
+	// Pledge Groups CRUD operations
+	CreatePledgeGroup(ctx context.Context, arg CreatePledgeGroupParams) (PledgeGroup, error)
+	// Pledge Group Members CRUD operations
+	CreatePledgeGroupMember(ctx context.Context, arg CreatePledgeGroupMemberParams) (PledgeGroupMember, error)
+	// Pledge Logs CRUD operations
+	CreatePledgeLog(ctx context.Context, arg CreatePledgeLogParams) (PledgeLog, error)
+	// Pledge Payments CRUD operations
+	CreatePledgePayment(ctx context.Context, arg CreatePledgePaymentParams) (PledgePayment, error)
+	// Pledge Reminders CRUD operations
+	CreatePledgeReminder(ctx context.Context, arg CreatePledgeReminderParams) (PledgeReminder, error)
 	CreatePriceField(ctx context.Context, arg CreatePriceFieldParams) (PriceField, error)
 	CreatePriceFieldValue(ctx context.Context, arg CreatePriceFieldValueParams) (PriceFieldValue, error)
 	CreatePriceSet(ctx context.Context, arg CreatePriceSetParams) (PriceSet, error)
@@ -163,6 +209,8 @@ type Querier interface {
 	CreateReportSubscription(ctx context.Context, arg CreateReportSubscriptionParams) (ReportSubscription, error)
 	CreateReportTemplate(ctx context.Context, arg CreateReportTemplateParams) (ReportTemplate, error)
 	CreateSetting(ctx context.Context, arg CreateSettingParams) (Setting, error)
+	// SMS Messages CRUD operations
+	CreateSmsMessage(ctx context.Context, arg CreateSmsMessageParams) (SmsMessage, error)
 	CreateSurvey(ctx context.Context, arg CreateSurveyParams) (Survey, error)
 	CreateSurveyCampaign(ctx context.Context, arg CreateSurveyCampaignParams) (SurveyCampaign, error)
 	CreateSurveyGroup(ctx context.Context, arg CreateSurveyGroupParams) (SurveyGroup, error)
@@ -171,9 +219,12 @@ type Querier interface {
 	CreateSurveyResponseAnswer(ctx context.Context, arg CreateSurveyResponseAnswerParams) (SurveyResponseAnswer, error)
 	CreateTag(ctx context.Context, arg CreateTagParams) (Tag, error)
 	CreateTagSet(ctx context.Context, arg CreateTagSetParams) (TagSet, error)
+	// Mailing Tracking CRUD operations
+	CreateTrackableUrl(ctx context.Context, arg CreateTrackableUrlParams) (MailingTrackableUrl, error)
 	CreateUFField(ctx context.Context, arg CreateUFFieldParams) (UfField, error)
 	CreateUFGroup(ctx context.Context, arg CreateUFGroupParams) (UfGroup, error)
 	CreateUFMatch(ctx context.Context, arg CreateUFMatchParams) (UfMatch, error)
+	CreateUrlClick(ctx context.Context, arg CreateUrlClickParams) (MailingUrlClick, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeactivateCampaign(ctx context.Context, id uuid.UUID) error
 	DeactivateCampaignContact(ctx context.Context, id uuid.UUID) error
@@ -219,8 +270,14 @@ type Querier interface {
 	DeleteCaseContact(ctx context.Context, id uuid.UUID) error
 	DeleteCaseStatus(ctx context.Context, id uuid.UUID) error
 	DeleteCaseType(ctx context.Context, id uuid.UUID) error
+	DeleteCommunicationPreferences(ctx context.Context, contactID uuid.UUID) error
 	DeleteContact(ctx context.Context, id uuid.UUID) error
 	DeleteContribution(ctx context.Context, id uuid.UUID) error
+	DeleteCustomField(ctx context.Context, id uuid.UUID) error
+	DeleteCustomFieldOption(ctx context.Context, id uuid.UUID) error
+	DeleteCustomGroup(ctx context.Context, id uuid.UUID) error
+	DeleteCustomValue(ctx context.Context, id uuid.UUID) error
+	DeleteCustomValuesByEntity(ctx context.Context, arg DeleteCustomValuesByEntityParams) error
 	DeleteDashboard(ctx context.Context, id uuid.UUID) error
 	DeleteDashboardWidget(ctx context.Context, id uuid.UUID) error
 	DeleteDiscount(ctx context.Context, id uuid.UUID) error
@@ -236,14 +293,25 @@ type Querier interface {
 	DeleteJobsByDomain(ctx context.Context, domainID uuid.UUID) error
 	DeleteLineItem(ctx context.Context, id uuid.UUID) error
 	DeleteLineItemsByEntity(ctx context.Context, arg DeleteLineItemsByEntityParams) error
+	DeleteMailing(ctx context.Context, id uuid.UUID) error
+	DeleteMailingList(ctx context.Context, id uuid.UUID) error
+	DeleteMailingListSubscription(ctx context.Context, id uuid.UUID) error
+	DeleteMailingRecipient(ctx context.Context, id uuid.UUID) error
 	DeleteMembership(ctx context.Context, id uuid.UUID) error
 	DeleteMembershipLog(ctx context.Context, id uuid.UUID) error
 	DeleteMembershipPayment(ctx context.Context, id uuid.UUID) error
 	DeleteMembershipStatus(ctx context.Context, id uuid.UUID) error
 	DeleteMembershipType(ctx context.Context, id uuid.UUID) error
+	DeleteMessageTemplate(ctx context.Context, id uuid.UUID) error
 	DeleteNavigation(ctx context.Context, arg DeleteNavigationParams) error
 	DeleteNavigationByDomain(ctx context.Context, domainID uuid.UUID) error
 	DeleteParticipant(ctx context.Context, id uuid.UUID) error
+	DeletePledge(ctx context.Context, id uuid.UUID) error
+	DeletePledgeBlock(ctx context.Context, id uuid.UUID) error
+	DeletePledgeGroup(ctx context.Context, id uuid.UUID) error
+	DeletePledgeGroupMember(ctx context.Context, id uuid.UUID) error
+	DeletePledgePayment(ctx context.Context, id uuid.UUID) error
+	DeletePledgeReminder(ctx context.Context, id uuid.UUID) error
 	DeletePriceField(ctx context.Context, id uuid.UUID) error
 	DeletePriceFieldValue(ctx context.Context, id uuid.UUID) error
 	DeletePriceSet(ctx context.Context, id uuid.UUID) error
@@ -257,6 +325,7 @@ type Querier interface {
 	DeleteReportTemplate(ctx context.Context, id uuid.UUID) error
 	DeleteSetting(ctx context.Context, arg DeleteSettingParams) error
 	DeleteSettingsByDomain(ctx context.Context, domainID uuid.UUID) error
+	DeleteSmsMessage(ctx context.Context, id uuid.UUID) error
 	DeleteSurvey(ctx context.Context, id uuid.UUID) error
 	DeleteSurveyCampaign(ctx context.Context, id uuid.UUID) error
 	DeleteSurveyGroup(ctx context.Context, id uuid.UUID) error
@@ -385,17 +454,32 @@ type Querier interface {
 	GetCaseTypeStats(ctx context.Context, isActive sql.NullBool) ([]GetCaseTypeStatsRow, error)
 	GetCaseWithDetails(ctx context.Context, id uuid.UUID) (GetCaseWithDetailsRow, error)
 	GetChildNavigation(ctx context.Context, parentID uuid.NullUUID) ([]Navigation, error)
+	GetCommunicationPreferences(ctx context.Context, contactID uuid.UUID) (CommunicationPreference, error)
 	GetCompletedSurveyResponses(ctx context.Context, surveyID uuid.UUID) ([]SurveyResponse, error)
 	GetContact(ctx context.Context, id uuid.UUID) (Contact, error)
 	GetContactByEmail(ctx context.Context, email sql.NullString) (Contact, error)
 	GetContactByPhone(ctx context.Context, phone sql.NullString) (Contact, error)
+	GetContactCommunicationHistory(ctx context.Context, arg GetContactCommunicationHistoryParams) ([]GetContactCommunicationHistoryRow, error)
 	GetContactsByLocation(ctx context.Context, arg GetContactsByLocationParams) ([]Contact, error)
 	GetContactsByType(ctx context.Context, contactType string) ([]Contact, error)
 	GetContactsForUser(ctx context.Context, arg GetContactsForUserParams) ([]Contact, error)
 	GetContribution(ctx context.Context, id uuid.UUID) (Contribution, error)
 	GetContributionsByContact(ctx context.Context, contactID uuid.UUID) ([]Contribution, error)
 	GetContributionsByDateRange(ctx context.Context, arg GetContributionsByDateRangeParams) ([]GetContributionsByDateRangeRow, error)
+	GetCustomField(ctx context.Context, id uuid.UUID) (CustomField, error)
+	GetCustomFieldByName(ctx context.Context, arg GetCustomFieldByNameParams) (CustomField, error)
+	GetCustomFieldOption(ctx context.Context, id uuid.UUID) (CustomFieldOption, error)
+	GetCustomFieldsForActivity(ctx context.Context, arg GetCustomFieldsForActivityParams) ([]GetCustomFieldsForActivityRow, error)
+	// Specialized queries for custom fields
+	GetCustomFieldsForContact(ctx context.Context, arg GetCustomFieldsForContactParams) ([]GetCustomFieldsForContactRow, error)
+	GetCustomFieldsForContribution(ctx context.Context, arg GetCustomFieldsForContributionParams) ([]GetCustomFieldsForContributionRow, error)
+	GetCustomFieldsForEvent(ctx context.Context, arg GetCustomFieldsForEventParams) ([]GetCustomFieldsForEventRow, error)
+	GetCustomGroup(ctx context.Context, id uuid.UUID) (CustomGroup, error)
+	GetCustomGroupByName(ctx context.Context, name string) (CustomGroup, error)
 	GetCustomReportTemplates(ctx context.Context, isActive sql.NullBool) ([]ReportTemplate, error)
+	GetCustomValue(ctx context.Context, id uuid.UUID) (CustomValue, error)
+	GetCustomValueByField(ctx context.Context, arg GetCustomValueByFieldParams) (CustomValue, error)
+	GetCustomValuesByEntity(ctx context.Context, arg GetCustomValuesByEntityParams) ([]GetCustomValuesByEntityRow, error)
 	GetDashboard(ctx context.Context, id uuid.UUID) (Dashboard, error)
 	GetDashboardByName(ctx context.Context, name string) (Dashboard, error)
 	GetDashboardStats(ctx context.Context, isActive sql.NullBool) ([]GetDashboardStatsRow, error)
@@ -447,6 +531,14 @@ type Querier interface {
 	GetLineItemsByEntity(ctx context.Context, arg GetLineItemsByEntityParams) ([]LineItem, error)
 	GetLineItemsByFinancialType(ctx context.Context, financialTypeID uuid.NullUUID) ([]LineItem, error)
 	GetLineItemsByPriceField(ctx context.Context, priceFieldID uuid.NullUUID) ([]LineItem, error)
+	GetMailing(ctx context.Context, id uuid.UUID) (Mailing, error)
+	GetMailingList(ctx context.Context, id uuid.UUID) (MailingList, error)
+	GetMailingListByName(ctx context.Context, name string) (MailingList, error)
+	GetMailingListSubscription(ctx context.Context, id uuid.UUID) (MailingListSubscription, error)
+	GetMailingPerformance(ctx context.Context, mailingID uuid.UUID) ([]GetMailingPerformanceRow, error)
+	GetMailingRecipient(ctx context.Context, id uuid.UUID) (MailingRecipient, error)
+	// Specialized queries for communication system
+	GetMailingStats(ctx context.Context, mailingID uuid.UUID) (GetMailingStatsRow, error)
 	GetMembership(ctx context.Context, id uuid.UUID) (Membership, error)
 	GetMembershipAuditTrail(ctx context.Context, membershipID uuid.UUID) ([]GetMembershipAuditTrailRow, error)
 	GetMembershipByContact(ctx context.Context, contactID uuid.UUID) ([]Membership, error)
@@ -465,6 +557,8 @@ type Querier interface {
 	GetMembershipStatusByName(ctx context.Context, name string) (MembershipStatus, error)
 	GetMembershipType(ctx context.Context, id uuid.UUID) (MembershipType, error)
 	GetMembershipTypeByName(ctx context.Context, name string) (MembershipType, error)
+	GetMessageTemplate(ctx context.Context, id uuid.UUID) (MessageTemplate, error)
+	GetMessageTemplateByName(ctx context.Context, name string) (MessageTemplate, error)
 	GetNavigation(ctx context.Context, id uuid.UUID) (Navigation, error)
 	GetNavigationBreadcrumb(ctx context.Context, id uuid.UUID) ([]GetNavigationBreadcrumbRow, error)
 	GetNavigationByName(ctx context.Context, arg GetNavigationByNameParams) (Navigation, error)
@@ -472,6 +566,8 @@ type Querier interface {
 	GetNavigationByURL(ctx context.Context, arg GetNavigationByURLParams) (Navigation, error)
 	GetNavigationSiblings(ctx context.Context, id uuid.UUID) ([]Navigation, error)
 	GetNavigationTree(ctx context.Context, domainID uuid.UUID) ([]GetNavigationTreeRow, error)
+	GetOptOutContacts(ctx context.Context, arg GetOptOutContactsParams) ([]GetOptOutContactsRow, error)
+	GetOverduePledges(ctx context.Context, scheduledDate time.Time) ([]GetOverduePledgesRow, error)
 	GetParticipant(ctx context.Context, id uuid.UUID) (Participant, error)
 	GetParticipantByEventAndContact(ctx context.Context, arg GetParticipantByEventAndContactParams) (Participant, error)
 	GetParticipantsByCampaign(ctx context.Context, campaignID uuid.NullUUID) ([]Participant, error)
@@ -480,6 +576,20 @@ type Querier interface {
 	GetParticipantsByStatus(ctx context.Context, statusID uuid.UUID) ([]Participant, error)
 	GetPastActivities(ctx context.Context) ([]Activity, error)
 	GetPastRegistrations(ctx context.Context) ([]GetPastRegistrationsRow, error)
+	GetPledge(ctx context.Context, id uuid.UUID) (Pledge, error)
+	GetPledgeBlock(ctx context.Context, id uuid.UUID) (PledgeBlock, error)
+	GetPledgeByContact(ctx context.Context, arg GetPledgeByContactParams) (Pledge, error)
+	GetPledgeGroup(ctx context.Context, id uuid.UUID) (PledgeGroup, error)
+	GetPledgeGroupMember(ctx context.Context, id uuid.UUID) (PledgeGroupMember, error)
+	GetPledgeGroupProgress(ctx context.Context, isActive sql.NullBool) ([]GetPledgeGroupProgressRow, error)
+	GetPledgeLogs(ctx context.Context, pledgeID uuid.UUID) ([]PledgeLog, error)
+	GetPledgePayment(ctx context.Context, id uuid.UUID) (PledgePayment, error)
+	GetPledgePaymentSchedule(ctx context.Context, pledgeID uuid.UUID) ([]GetPledgePaymentScheduleRow, error)
+	GetPledgePerformance(ctx context.Context, createdAt sql.NullTime) ([]GetPledgePerformanceRow, error)
+	GetPledgeReminder(ctx context.Context, id uuid.UUID) (PledgeReminder, error)
+	GetPledgeReminderQueue(ctx context.Context, scheduledDate time.Time) ([]GetPledgeReminderQueueRow, error)
+	// Specialized queries for pledge system
+	GetPledgeSummary(ctx context.Context, campaignID uuid.NullUUID) (GetPledgeSummaryRow, error)
 	GetPopularTags(ctx context.Context, arg GetPopularTagsParams) ([]GetPopularTagsRow, error)
 	GetPriceField(ctx context.Context, id uuid.UUID) (PriceField, error)
 	GetPriceFieldByName(ctx context.Context, arg GetPriceFieldByNameParams) (PriceField, error)
@@ -496,6 +606,7 @@ type Querier interface {
 	GetQueuePerformanceMetrics(ctx context.Context, queueID uuid.UUID) ([]GetQueuePerformanceMetricsRow, error)
 	GetQueueStats(ctx context.Context, queueID uuid.UUID) (GetQueueStatsRow, error)
 	GetQueueWithItems(ctx context.Context, id uuid.UUID) ([]GetQueueWithItemsRow, error)
+	GetRecipientByMailingAndContact(ctx context.Context, arg GetRecipientByMailingAndContactParams) (MailingRecipient, error)
 	GetRegistrationsByContact(ctx context.Context, contactID uuid.UUID) ([]GetRegistrationsByContactRow, error)
 	GetRegistrationsByEvent(ctx context.Context, eventID uuid.UUID) ([]GetRegistrationsByEventRow, error)
 	GetReportInstance(ctx context.Context, id uuid.UUID) (ReportInstance, error)
@@ -539,6 +650,8 @@ type Querier interface {
 	GetSettingValue(ctx context.Context, arg GetSettingValueParams) (sql.NullString, error)
 	GetSettingsByDomain(ctx context.Context, domainID uuid.UUID) ([]Setting, error)
 	GetSettingsByPrefix(ctx context.Context, arg GetSettingsByPrefixParams) ([]Setting, error)
+	GetSmsMessage(ctx context.Context, id uuid.UUID) (SmsMessage, error)
+	GetSubscriptionByContactAndList(ctx context.Context, arg GetSubscriptionByContactAndListParams) (MailingListSubscription, error)
 	GetSurvey(ctx context.Context, id uuid.UUID) (Survey, error)
 	GetSurveyAnalytics(ctx context.Context, surveyID uuid.UUID) ([]GetSurveyAnalyticsRow, error)
 	GetSurveyByTitle(ctx context.Context, title string) (Survey, error)
@@ -588,9 +701,11 @@ type Querier interface {
 	GetTaggedEntities(ctx context.Context, entityTable string) ([]GetTaggedEntitiesRow, error)
 	GetTagsByEntityTable(ctx context.Context, arg GetTagsByEntityTableParams) ([]Tag, error)
 	GetTagsByTagSet(ctx context.Context, arg GetTagsByTagSetParams) ([]Tag, error)
+	GetTopClickedUrls(ctx context.Context, arg GetTopClickedUrlsParams) ([]GetTopClickedUrlsRow, error)
 	GetTotalContributions(ctx context.Context) (int64, error)
 	GetTotalContributionsByContact(ctx context.Context, contactID uuid.UUID) (int64, error)
 	GetTotalLineItemsByEntity(ctx context.Context, arg GetTotalLineItemsByEntityParams) (interface{}, error)
+	GetTrackableUrl(ctx context.Context, id uuid.UUID) (MailingTrackableUrl, error)
 	GetUFField(ctx context.Context, id uuid.UUID) (UfField, error)
 	GetUFFieldByName(ctx context.Context, arg GetUFFieldByNameParams) (UfField, error)
 	GetUFFieldWithGroup(ctx context.Context, id uuid.UUID) (GetUFFieldWithGroupRow, error)
@@ -674,6 +789,7 @@ type Querier interface {
 	ListAllActivities(ctx context.Context) ([]Activity, error)
 	ListAllActivityContacts(ctx context.Context) ([]ActivityContact, error)
 	ListAllContacts(ctx context.Context, arg ListAllContactsParams) ([]Contact, error)
+	ListAllCustomGroups(ctx context.Context, isActive sql.NullBool) ([]CustomGroup, error)
 	ListAllJobs(ctx context.Context) ([]ListAllJobsRow, error)
 	ListAllLineItems(ctx context.Context) ([]LineItem, error)
 	ListAllParticipants(ctx context.Context) ([]Participant, error)
@@ -728,6 +844,10 @@ type Querier interface {
 	ListContributionsByStatus(ctx context.Context, arg ListContributionsByStatusParams) ([]ListContributionsByStatusRow, error)
 	ListContributionsByType(ctx context.Context, arg ListContributionsByTypeParams) ([]ListContributionsByTypeRow, error)
 	ListCurrentMemberStatuses(ctx context.Context, isActive sql.NullBool) ([]MembershipStatus, error)
+	ListCustomFieldOptions(ctx context.Context, arg ListCustomFieldOptionsParams) ([]CustomFieldOption, error)
+	ListCustomFieldsByEntity(ctx context.Context, arg ListCustomFieldsByEntityParams) ([]ListCustomFieldsByEntityRow, error)
+	ListCustomFieldsByGroup(ctx context.Context, arg ListCustomFieldsByGroupParams) ([]CustomField, error)
+	ListCustomGroups(ctx context.Context, arg ListCustomGroupsParams) ([]CustomGroup, error)
 	ListDashboardWidgets(ctx context.Context) ([]DashboardWidget, error)
 	ListDashboardWidgetsByType(ctx context.Context, arg ListDashboardWidgetsByTypeParams) ([]DashboardWidget, error)
 	ListDashboards(ctx context.Context) ([]Dashboard, error)
@@ -749,6 +869,9 @@ type Querier interface {
 	ListHeaderAccounts(ctx context.Context, arg ListHeaderAccountsParams) ([]FinancialAccount, error)
 	ListJobsByDomain(ctx context.Context, domainID uuid.UUID) ([]Job, error)
 	ListJobsByType(ctx context.Context, arg ListJobsByTypeParams) ([]Job, error)
+	ListMailingLists(ctx context.Context, arg ListMailingListsParams) ([]MailingList, error)
+	ListMailings(ctx context.Context, status sql.NullString) ([]Mailing, error)
+	ListMailingsByCreator(ctx context.Context, createdBy uuid.NullUUID) ([]Mailing, error)
 	ListMembershipLogs(ctx context.Context) ([]MembershipLog, error)
 	ListMembershipLogsByDateRange(ctx context.Context, arg ListMembershipLogsByDateRangeParams) ([]MembershipLog, error)
 	ListMembershipLogsByModifier(ctx context.Context, modifiedByContactID uuid.NullUUID) ([]MembershipLog, error)
@@ -768,11 +891,25 @@ type Querier interface {
 	ListMembershipsByDateRange(ctx context.Context, arg ListMembershipsByDateRangeParams) ([]Membership, error)
 	ListMembershipsByStatus(ctx context.Context, arg ListMembershipsByStatusParams) ([]Membership, error)
 	ListMembershipsByType(ctx context.Context, arg ListMembershipsByTypeParams) ([]Membership, error)
+	ListMessageTemplates(ctx context.Context, arg ListMessageTemplatesParams) ([]MessageTemplate, error)
+	ListMessageTemplatesByWorkflow(ctx context.Context, arg ListMessageTemplatesByWorkflowParams) ([]MessageTemplate, error)
 	ListMultiRecordActivityTypes(ctx context.Context) ([]ActivityType, error)
 	ListOpenCaseStatus(ctx context.Context, isActive sql.NullBool) ([]CaseStatus, error)
 	ListOpenCases(ctx context.Context) ([]Case, error)
 	ListPastEvents(ctx context.Context, arg ListPastEventsParams) ([]Event, error)
 	ListPlannedCampaignStatus(ctx context.Context, isActive sql.NullBool) ([]CampaignStatus, error)
+	ListPledgeBlocks(ctx context.Context, isActive sql.NullBool) ([]PledgeBlock, error)
+	ListPledgeBlocksByCampaign(ctx context.Context, arg ListPledgeBlocksByCampaignParams) ([]PledgeBlock, error)
+	ListPledgeGroupMembers(ctx context.Context, arg ListPledgeGroupMembersParams) ([]ListPledgeGroupMembersRow, error)
+	ListPledgeGroups(ctx context.Context, isActive sql.NullBool) ([]PledgeGroup, error)
+	ListPledgeLogsByUser(ctx context.Context, arg ListPledgeLogsByUserParams) ([]ListPledgeLogsByUserRow, error)
+	ListPledgePayments(ctx context.Context, pledgeID uuid.UUID) ([]PledgePayment, error)
+	ListPledgePaymentsByStatus(ctx context.Context, status sql.NullString) ([]ListPledgePaymentsByStatusRow, error)
+	ListPledgeReminders(ctx context.Context, arg ListPledgeRemindersParams) ([]PledgeReminder, error)
+	ListPledgesByBlock(ctx context.Context, arg ListPledgesByBlockParams) ([]ListPledgesByBlockRow, error)
+	ListPledgesByCampaign(ctx context.Context, arg ListPledgesByCampaignParams) ([]ListPledgesByCampaignRow, error)
+	ListPledgesByContact(ctx context.Context, contactID uuid.UUID) ([]Pledge, error)
+	ListPledgesByStatus(ctx context.Context, status sql.NullString) ([]ListPledgesByStatusRow, error)
 	ListPriceFieldValues(ctx context.Context, priceFieldID uuid.UUID) ([]PriceFieldValue, error)
 	ListPriceFieldValuesByFinancialType(ctx context.Context, arg ListPriceFieldValuesByFinancialTypeParams) ([]PriceFieldValue, error)
 	ListPriceFields(ctx context.Context, priceSetID uuid.UUID) ([]PriceField, error)
@@ -782,6 +919,7 @@ type Querier interface {
 	ListPriceSetsByExtends(ctx context.Context, arg ListPriceSetsByExtendsParams) ([]PriceSet, error)
 	ListPriceSetsByFinancialType(ctx context.Context, arg ListPriceSetsByFinancialTypeParams) ([]PriceSet, error)
 	ListQueuesByDomain(ctx context.Context, domainID uuid.UUID) ([]Queue, error)
+	ListRecipientsByMailing(ctx context.Context, mailingID uuid.UUID) ([]ListRecipientsByMailingRow, error)
 	ListRegistrationsByStatus(ctx context.Context, arg ListRegistrationsByStatusParams) ([]ListRegistrationsByStatusRow, error)
 	ListReportInstances(ctx context.Context) ([]ReportInstance, error)
 	ListReportInstancesByDateRange(ctx context.Context, arg ListReportInstancesByDateRangeParams) ([]ReportInstance, error)
@@ -803,6 +941,10 @@ type Querier interface {
 	ListReservedTags(ctx context.Context, isActive sql.NullBool) ([]Tag, error)
 	ListReservedUFGroupsByDomain(ctx context.Context, domainID uuid.UUID) ([]UfGroup, error)
 	ListScheduledJobs(ctx context.Context, domainID uuid.UUID) ([]Job, error)
+	ListScheduledReminders(ctx context.Context, scheduledDate time.Time) ([]ListScheduledRemindersRow, error)
+	ListSmsMessagesByContact(ctx context.Context, contactID uuid.UUID) ([]SmsMessage, error)
+	ListSubscriptionsByContact(ctx context.Context, arg ListSubscriptionsByContactParams) ([]ListSubscriptionsByContactRow, error)
+	ListSubscriptionsByList(ctx context.Context, arg ListSubscriptionsByListParams) ([]ListSubscriptionsByListRow, error)
 	ListSurveyCampaigns(ctx context.Context) ([]SurveyCampaign, error)
 	ListSurveyGroups(ctx context.Context) ([]SurveyGroup, error)
 	ListSurveyQuestions(ctx context.Context) ([]SurveyQuestion, error)
@@ -819,6 +961,7 @@ type Querier interface {
 	ListTargetActivityTypes(ctx context.Context) ([]ActivityType, error)
 	ListTestParticipants(ctx context.Context, isTest sql.NullBool) ([]Participant, error)
 	ListTestSurveyResponses(ctx context.Context, isTest sql.NullBool) ([]SurveyResponse, error)
+	ListTrackableUrlsByMailing(ctx context.Context, mailingID uuid.UUID) ([]MailingTrackableUrl, error)
 	ListUFFieldsByGroup(ctx context.Context, ufGroupID uuid.UUID) ([]UfField, error)
 	ListUFFieldsByType(ctx context.Context, arg ListUFFieldsByTypeParams) ([]UfField, error)
 	ListUFGroupsByDomain(ctx context.Context, domainID uuid.UUID) ([]UfGroup, error)
@@ -853,6 +996,8 @@ type Querier interface {
 	SearchCases(ctx context.Context, subject string) ([]Case, error)
 	SearchContacts(ctx context.Context, arg SearchContactsParams) ([]Contact, error)
 	SearchContributions(ctx context.Context, arg SearchContributionsParams) ([]SearchContributionsRow, error)
+	// Search queries for custom fields
+	SearchCustomValues(ctx context.Context, arg SearchCustomValuesParams) ([]SearchCustomValuesRow, error)
 	SearchDashboardWidgets(ctx context.Context, arg SearchDashboardWidgetsParams) ([]DashboardWidget, error)
 	SearchDashboards(ctx context.Context, arg SearchDashboardsParams) ([]Dashboard, error)
 	SearchDiscounts(ctx context.Context, arg SearchDiscountsParams) ([]Discount, error)
@@ -925,8 +1070,13 @@ type Querier interface {
 	UpdateCaseStatusWeight(ctx context.Context, arg UpdateCaseStatusWeightParams) error
 	UpdateCaseType(ctx context.Context, arg UpdateCaseTypeParams) (CaseType, error)
 	UpdateCaseTypeWeight(ctx context.Context, arg UpdateCaseTypeWeightParams) error
+	UpdateCommunicationPreferences(ctx context.Context, arg UpdateCommunicationPreferencesParams) (CommunicationPreference, error)
 	UpdateContact(ctx context.Context, arg UpdateContactParams) (Contact, error)
 	UpdateContribution(ctx context.Context, arg UpdateContributionParams) (Contribution, error)
+	UpdateCustomField(ctx context.Context, arg UpdateCustomFieldParams) (CustomField, error)
+	UpdateCustomFieldOption(ctx context.Context, arg UpdateCustomFieldOptionParams) (CustomFieldOption, error)
+	UpdateCustomGroup(ctx context.Context, arg UpdateCustomGroupParams) (CustomGroup, error)
+	UpdateCustomValue(ctx context.Context, arg UpdateCustomValueParams) (CustomValue, error)
 	UpdateDashboard(ctx context.Context, arg UpdateDashboardParams) (Dashboard, error)
 	UpdateDashboardLayout(ctx context.Context, arg UpdateDashboardLayoutParams) error
 	UpdateDashboardWidget(ctx context.Context, arg UpdateDashboardWidgetParams) (DashboardWidget, error)
@@ -945,6 +1095,9 @@ type Querier interface {
 	UpdateJobSchedule(ctx context.Context, arg UpdateJobScheduleParams) (Job, error)
 	UpdateJobStatus(ctx context.Context, arg UpdateJobStatusParams) (Job, error)
 	UpdateLineItem(ctx context.Context, arg UpdateLineItemParams) (LineItem, error)
+	UpdateMailingList(ctx context.Context, arg UpdateMailingListParams) (MailingList, error)
+	UpdateMailingStats(ctx context.Context, arg UpdateMailingStatsParams) (Mailing, error)
+	UpdateMailingStatus(ctx context.Context, arg UpdateMailingStatusParams) (Mailing, error)
 	UpdateMembership(ctx context.Context, arg UpdateMembershipParams) (Membership, error)
 	UpdateMembershipLog(ctx context.Context, arg UpdateMembershipLogParams) (MembershipLog, error)
 	UpdateMembershipPayment(ctx context.Context, arg UpdateMembershipPaymentParams) (MembershipPayment, error)
@@ -953,16 +1106,27 @@ type Querier interface {
 	UpdateMembershipStatusWeight(ctx context.Context, arg UpdateMembershipStatusWeightParams) error
 	UpdateMembershipType(ctx context.Context, arg UpdateMembershipTypeParams) (MembershipType, error)
 	UpdateMembershipTypeWeight(ctx context.Context, arg UpdateMembershipTypeWeightParams) error
+	UpdateMessageTemplate(ctx context.Context, arg UpdateMessageTemplateParams) (MessageTemplate, error)
 	UpdateNavigation(ctx context.Context, arg UpdateNavigationParams) (Navigation, error)
 	UpdateNavigationStatus(ctx context.Context, arg UpdateNavigationStatusParams) (Navigation, error)
 	UpdateNavigationWeight(ctx context.Context, arg UpdateNavigationWeightParams) (Navigation, error)
 	UpdateParticipant(ctx context.Context, arg UpdateParticipantParams) (Participant, error)
 	UpdatePaymentStatus(ctx context.Context, arg UpdatePaymentStatusParams) error
+	UpdatePledge(ctx context.Context, arg UpdatePledgeParams) (Pledge, error)
+	UpdatePledgeBlock(ctx context.Context, arg UpdatePledgeBlockParams) (PledgeBlock, error)
+	UpdatePledgeGroup(ctx context.Context, arg UpdatePledgeGroupParams) (PledgeGroup, error)
+	UpdatePledgeGroupAmount(ctx context.Context, arg UpdatePledgeGroupAmountParams) (PledgeGroup, error)
+	UpdatePledgeGroupMember(ctx context.Context, arg UpdatePledgeGroupMemberParams) (PledgeGroupMember, error)
+	UpdatePledgePayment(ctx context.Context, arg UpdatePledgePaymentParams) (PledgePayment, error)
+	UpdatePledgePaymentStatus(ctx context.Context, arg UpdatePledgePaymentStatusParams) (PledgePayment, error)
+	UpdatePledgeStatus(ctx context.Context, arg UpdatePledgeStatusParams) (Pledge, error)
 	UpdatePriceField(ctx context.Context, arg UpdatePriceFieldParams) (PriceField, error)
 	UpdatePriceFieldValue(ctx context.Context, arg UpdatePriceFieldValueParams) (PriceFieldValue, error)
 	UpdatePriceSet(ctx context.Context, arg UpdatePriceSetParams) (PriceSet, error)
 	UpdateQueue(ctx context.Context, arg UpdateQueueParams) (Queue, error)
 	UpdateQueueStatus(ctx context.Context, arg UpdateQueueStatusParams) (Queue, error)
+	UpdateRecipientStatus(ctx context.Context, arg UpdateRecipientStatusParams) (MailingRecipient, error)
+	UpdateReminderStatus(ctx context.Context, arg UpdateReminderStatusParams) (PledgeReminder, error)
 	UpdateReportInstance(ctx context.Context, arg UpdateReportInstanceParams) (ReportInstance, error)
 	UpdateReportInstanceLastRun(ctx context.Context, arg UpdateReportInstanceLastRunParams) error
 	UpdateReportInstanceNextRun(ctx context.Context, arg UpdateReportInstanceNextRunParams) error
@@ -977,6 +1141,8 @@ type Querier interface {
 	UpdateReportTemplate(ctx context.Context, arg UpdateReportTemplateParams) (ReportTemplate, error)
 	UpdateSetting(ctx context.Context, arg UpdateSettingParams) (Setting, error)
 	UpdateSettingValue(ctx context.Context, arg UpdateSettingValueParams) (Setting, error)
+	UpdateSmsStatus(ctx context.Context, arg UpdateSmsStatusParams) (SmsMessage, error)
+	UpdateSubscriptionStatus(ctx context.Context, arg UpdateSubscriptionStatusParams) (MailingListSubscription, error)
 	UpdateSurvey(ctx context.Context, arg UpdateSurveyParams) (Survey, error)
 	UpdateSurveyCampaign(ctx context.Context, arg UpdateSurveyCampaignParams) (SurveyCampaign, error)
 	UpdateSurveyGroup(ctx context.Context, arg UpdateSurveyGroupParams) (SurveyGroup, error)
@@ -996,6 +1162,7 @@ type Querier interface {
 	UpdateUFGroup(ctx context.Context, arg UpdateUFGroupParams) (UfGroup, error)
 	UpdateUFGroupStatus(ctx context.Context, arg UpdateUFGroupStatusParams) (UfGroup, error)
 	UpdateUFMatch(ctx context.Context, arg UpdateUFMatchParams) (UfMatch, error)
+	UpdateUrlClickCount(ctx context.Context, arg UpdateUrlClickCountParams) (MailingTrackableUrl, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserLastLogin(ctx context.Context, id uuid.UUID) (User, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)

@@ -240,8 +240,8 @@ ORDER BY ufj.weight ASC, uff.weight ASC, uff.name ASC
 `
 
 type GetUFFieldsByEntityParams struct {
-	EntityTable string        `json:"entity_table"`
-	EntityID    uuid.NullUUID `json:"entity_id"`
+	EntityTable string    `json:"entity_table"`
+	EntityID    uuid.UUID `json:"entity_id"`
 }
 
 type GetUFFieldsByEntityRow struct {

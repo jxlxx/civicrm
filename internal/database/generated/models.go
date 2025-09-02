@@ -350,6 +350,23 @@ type CaseType struct {
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
 }
 
+// Contact communication preferences and opt-outs
+type CommunicationPreference struct {
+	ID          uuid.UUID    `json:"id"`
+	ContactID   uuid.UUID    `json:"contact_id"`
+	EmailOptOut sql.NullBool `json:"email_opt_out"`
+	SmsOptOut   sql.NullBool `json:"sms_opt_out"`
+	MailOptOut  sql.NullBool `json:"mail_opt_out"`
+	PhoneOptOut sql.NullBool `json:"phone_opt_out"`
+	DoNotEmail  sql.NullBool `json:"do_not_email"`
+	DoNotSms    sql.NullBool `json:"do_not_sms"`
+	DoNotMail   sql.NullBool `json:"do_not_mail"`
+	DoNotPhone  sql.NullBool `json:"do_not_phone"`
+	DoNotTrade  sql.NullBool `json:"do_not_trade"`
+	CreatedAt   sql.NullTime `json:"created_at"`
+	UpdatedAt   sql.NullTime `json:"updated_at"`
+}
+
 type Contact struct {
 	ID               uuid.UUID      `json:"id"`
 	ContactType      string         `json:"contact_type"`
@@ -388,6 +405,79 @@ type Country struct {
 	IsActive    sql.NullBool   `json:"is_active"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+// Individual custom field definitions within custom groups
+type CustomField struct {
+	ID             uuid.UUID      `json:"id"`
+	CustomGroupID  uuid.UUID      `json:"custom_group_id"`
+	Name           string         `json:"name"`
+	Label          string         `json:"label"`
+	DataType       string         `json:"data_type"`
+	HtmlType       string         `json:"html_type"`
+	IsRequired     sql.NullBool   `json:"is_required"`
+	IsSearchable   sql.NullBool   `json:"is_searchable"`
+	IsSearchRange  sql.NullBool   `json:"is_search_range"`
+	IsView         sql.NullBool   `json:"is_view"`
+	IsActive       sql.NullBool   `json:"is_active"`
+	Weight         sql.NullInt32  `json:"weight"`
+	HelpPre        sql.NullString `json:"help_pre"`
+	HelpPost       sql.NullString `json:"help_post"`
+	DefaultValue   sql.NullString `json:"default_value"`
+	TextLength     sql.NullInt32  `json:"text_length"`
+	StartDateYears sql.NullInt32  `json:"start_date_years"`
+	EndDateYears   sql.NullInt32  `json:"end_date_years"`
+	DateFormat     sql.NullString `json:"date_format"`
+	TimeFormat     sql.NullString `json:"time_format"`
+	OptionGroupID  uuid.NullUUID  `json:"option_group_id"`
+	Filter         sql.NullString `json:"filter"`
+	InSelector     sql.NullBool   `json:"in_selector"`
+	CreatedAt      sql.NullTime   `json:"created_at"`
+	UpdatedAt      sql.NullTime   `json:"updated_at"`
+}
+
+// Options for select/radio/checkbox custom fields
+type CustomFieldOption struct {
+	ID            uuid.UUID     `json:"id"`
+	CustomFieldID uuid.UUID     `json:"custom_field_id"`
+	Label         string        `json:"label"`
+	Value         string        `json:"value"`
+	Weight        sql.NullInt32 `json:"weight"`
+	IsActive      sql.NullBool  `json:"is_active"`
+	CreatedAt     sql.NullTime  `json:"created_at"`
+}
+
+// Groups of custom fields that extend CiviCRM entities
+type CustomGroup struct {
+	ID              uuid.UUID      `json:"id"`
+	Name            string         `json:"name"`
+	Title           string         `json:"title"`
+	Extends         string         `json:"extends"`
+	TableName       sql.NullString `json:"table_name"`
+	IsActive        sql.NullBool   `json:"is_active"`
+	IsMultiple      sql.NullBool   `json:"is_multiple"`
+	CollapseDisplay sql.NullBool   `json:"collapse_display"`
+	HelpPre         sql.NullString `json:"help_pre"`
+	HelpPost        sql.NullString `json:"help_post"`
+	Weight          sql.NullInt32  `json:"weight"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
+// Actual values stored for custom fields on entities
+type CustomValue struct {
+	ID            uuid.UUID      `json:"id"`
+	CustomFieldID uuid.UUID      `json:"custom_field_id"`
+	EntityTable   string         `json:"entity_table"`
+	EntityID      uuid.UUID      `json:"entity_id"`
+	ValueText     sql.NullString `json:"value_text"`
+	ValueInt      sql.NullInt32  `json:"value_int"`
+	ValueFloat    sql.NullString `json:"value_float"`
+	ValueDate     sql.NullTime   `json:"value_date"`
+	ValueBoolean  sql.NullBool   `json:"value_boolean"`
+	ValueLink     sql.NullString `json:"value_link"`
+	CreatedAt     sql.NullTime   `json:"created_at"`
+	UpdatedAt     sql.NullTime   `json:"updated_at"`
 }
 
 type Dashboard struct {
@@ -666,6 +756,103 @@ type LocationType struct {
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
 }
 
+// Individual email campaigns
+type Mailing struct {
+	ID                uuid.UUID      `json:"id"`
+	Name              string         `json:"name"`
+	Subject           sql.NullString `json:"subject"`
+	BodyText          sql.NullString `json:"body_text"`
+	BodyHtml          sql.NullString `json:"body_html"`
+	TemplateID        uuid.NullUUID  `json:"template_id"`
+	MailingListID     uuid.NullUUID  `json:"mailing_list_id"`
+	Status            sql.NullString `json:"status"`
+	ScheduledDate     sql.NullTime   `json:"scheduled_date"`
+	StartDate         sql.NullTime   `json:"start_date"`
+	EndDate           sql.NullTime   `json:"end_date"`
+	TotalRecipients   sql.NullInt32  `json:"total_recipients"`
+	TotalSent         sql.NullInt32  `json:"total_sent"`
+	TotalOpened       sql.NullInt32  `json:"total_opened"`
+	TotalClicked      sql.NullInt32  `json:"total_clicked"`
+	TotalBounced      sql.NullInt32  `json:"total_bounced"`
+	TotalUnsubscribed sql.NullInt32  `json:"total_unsubscribed"`
+	CreatedBy         uuid.NullUUID  `json:"created_by"`
+	CreatedAt         sql.NullTime   `json:"created_at"`
+	UpdatedAt         sql.NullTime   `json:"updated_at"`
+}
+
+// Groups of contacts for mass communications
+type MailingList struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	IsPublic    sql.NullBool   `json:"is_public"`
+	IsHidden    sql.NullBool   `json:"is_hidden"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+// Contact subscriptions to mailing lists
+type MailingListSubscription struct {
+	ID            uuid.UUID      `json:"id"`
+	MailingListID uuid.UUID      `json:"mailing_list_id"`
+	ContactID     uuid.UUID      `json:"contact_id"`
+	Status        sql.NullString `json:"status"`
+	Source        sql.NullString `json:"source"`
+	IsActive      sql.NullBool   `json:"is_active"`
+	CreatedAt     sql.NullTime   `json:"created_at"`
+	UpdatedAt     sql.NullTime   `json:"updated_at"`
+}
+
+// Email open tracking records
+type MailingOpen struct {
+	ID          uuid.UUID      `json:"id"`
+	RecipientID uuid.UUID      `json:"recipient_id"`
+	ContactID   uuid.UUID      `json:"contact_id"`
+	IpAddress   pqtype.Inet    `json:"ip_address"`
+	UserAgent   sql.NullString `json:"user_agent"`
+	OpenedAt    sql.NullTime   `json:"opened_at"`
+}
+
+// Individual recipients for each mailing
+type MailingRecipient struct {
+	ID            uuid.UUID      `json:"id"`
+	MailingID     uuid.UUID      `json:"mailing_id"`
+	ContactID     uuid.UUID      `json:"contact_id"`
+	Email         string         `json:"email"`
+	Status        sql.NullString `json:"status"`
+	SentDate      sql.NullTime   `json:"sent_date"`
+	DeliveredDate sql.NullTime   `json:"delivered_date"`
+	OpenedDate    sql.NullTime   `json:"opened_date"`
+	ClickedDate   sql.NullTime   `json:"clicked_date"`
+	BounceReason  sql.NullString `json:"bounce_reason"`
+	CreatedAt     sql.NullTime   `json:"created_at"`
+	UpdatedAt     sql.NullTime   `json:"updated_at"`
+}
+
+// URLs in emails for click tracking
+type MailingTrackableUrl struct {
+	ID           uuid.UUID     `json:"id"`
+	MailingID    uuid.UUID     `json:"mailing_id"`
+	Url          string        `json:"url"`
+	OriginalUrl  string        `json:"original_url"`
+	ClickCount   sql.NullInt32 `json:"click_count"`
+	UniqueClicks sql.NullInt32 `json:"unique_clicks"`
+	CreatedAt    sql.NullTime  `json:"created_at"`
+}
+
+// Individual click tracking records
+type MailingUrlClick struct {
+	ID             uuid.UUID      `json:"id"`
+	TrackableUrlID uuid.UUID      `json:"trackable_url_id"`
+	RecipientID    uuid.UUID      `json:"recipient_id"`
+	ContactID      uuid.UUID      `json:"contact_id"`
+	IpAddress      pqtype.Inet    `json:"ip_address"`
+	UserAgent      sql.NullString `json:"user_agent"`
+	ClickedAt      sql.NullTime   `json:"clicked_at"`
+}
+
 type Membership struct {
 	ID                    uuid.UUID      `json:"id"`
 	ContactID             uuid.UUID      `json:"contact_id"`
@@ -768,6 +955,22 @@ type MenuItem struct {
 	UpdatedAt    sql.NullTime   `json:"updated_at"`
 }
 
+// Reusable message templates for emails, SMS, and letters
+type MessageTemplate struct {
+	ID           uuid.UUID      `json:"id"`
+	Name         string         `json:"name"`
+	Title        string         `json:"title"`
+	Subject      sql.NullString `json:"subject"`
+	BodyText     sql.NullString `json:"body_text"`
+	BodyHtml     sql.NullString `json:"body_html"`
+	TemplateType string         `json:"template_type"`
+	IsActive     sql.NullBool   `json:"is_active"`
+	IsDefault    sql.NullBool   `json:"is_default"`
+	WorkflowName sql.NullString `json:"workflow_name"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	UpdatedAt    sql.NullTime   `json:"updated_at"`
+}
+
 type Navigation struct {
 	ID         uuid.UUID      `json:"id"`
 	DomainID   uuid.UUID      `json:"domain_id"`
@@ -839,6 +1042,112 @@ type Phone struct {
 	PhoneExt       sql.NullString `json:"phone_ext"`
 	CreatedAt      sql.NullTime   `json:"created_at"`
 	UpdatedAt      sql.NullTime   `json:"updated_at"`
+}
+
+// Individual pledge records for recurring donations
+type Pledge struct {
+	ID                  uuid.UUID      `json:"id"`
+	ContactID           uuid.UUID      `json:"contact_id"`
+	CampaignID          uuid.NullUUID  `json:"campaign_id"`
+	PledgeBlockID       uuid.NullUUID  `json:"pledge_block_id"`
+	Amount              string         `json:"amount"`
+	Installments        sql.NullInt32  `json:"installments"`
+	Frequency           sql.NullString `json:"frequency"`
+	FrequencyInterval   sql.NullInt32  `json:"frequency_interval"`
+	StartDate           time.Time      `json:"start_date"`
+	EndDate             sql.NullTime   `json:"end_date"`
+	NextPaymentDate     sql.NullTime   `json:"next_payment_date"`
+	Status              sql.NullString `json:"status"`
+	Currency            sql.NullString `json:"currency"`
+	FinancialTypeID     uuid.NullUUID  `json:"financial_type_id"`
+	PaymentInstrumentID uuid.NullUUID  `json:"payment_instrument_id"`
+	IsTest              sql.NullBool   `json:"is_test"`
+	CreatedAt           sql.NullTime   `json:"created_at"`
+	UpdatedAt           sql.NullTime   `json:"updated_at"`
+}
+
+// Campaign blocks for pledge drives and fundraising campaigns
+type PledgeBlock struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	CampaignID  uuid.NullUUID  `json:"campaign_id"`
+	IsActive    sql.NullBool   `json:"is_active"`
+	StartDate   sql.NullTime   `json:"start_date"`
+	EndDate     sql.NullTime   `json:"end_date"`
+	GoalAmount  sql.NullString `json:"goal_amount"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+// Group pledges for team fundraising and peer-to-peer campaigns
+type PledgeGroup struct {
+	ID            uuid.UUID      `json:"id"`
+	Name          string         `json:"name"`
+	Description   sql.NullString `json:"description"`
+	GoalAmount    sql.NullString `json:"goal_amount"`
+	CurrentAmount sql.NullString `json:"current_amount"`
+	IsActive      sql.NullBool   `json:"is_active"`
+	CreatedAt     sql.NullTime   `json:"created_at"`
+	UpdatedAt     sql.NullTime   `json:"updated_at"`
+}
+
+// Members of pledge groups with roles and relationships
+type PledgeGroupMember struct {
+	ID            uuid.UUID      `json:"id"`
+	PledgeGroupID uuid.UUID      `json:"pledge_group_id"`
+	ContactID     uuid.UUID      `json:"contact_id"`
+	PledgeID      uuid.NullUUID  `json:"pledge_id"`
+	Role          sql.NullString `json:"role"`
+	IsActive      sql.NullBool   `json:"is_active"`
+	JoinedDate    sql.NullTime   `json:"joined_date"`
+	CreatedAt     sql.NullTime   `json:"created_at"`
+	UpdatedAt     sql.NullTime   `json:"updated_at"`
+}
+
+// Audit trail for pledge changes and modifications
+type PledgeLog struct {
+	ID           uuid.UUID      `json:"id"`
+	PledgeID     uuid.UUID      `json:"pledge_id"`
+	Action       string         `json:"action"`
+	Description  sql.NullString `json:"description"`
+	AmountBefore sql.NullString `json:"amount_before"`
+	AmountAfter  sql.NullString `json:"amount_after"`
+	StatusBefore sql.NullString `json:"status_before"`
+	StatusAfter  sql.NullString `json:"status_after"`
+	CreatedBy    uuid.NullUUID  `json:"created_by"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+}
+
+// Individual payment records for pledge installments
+type PledgePayment struct {
+	ID              uuid.UUID      `json:"id"`
+	PledgeID        uuid.UUID      `json:"pledge_id"`
+	ContributionID  uuid.NullUUID  `json:"contribution_id"`
+	ScheduledAmount string         `json:"scheduled_amount"`
+	ActualAmount    sql.NullString `json:"actual_amount"`
+	ScheduledDate   time.Time      `json:"scheduled_date"`
+	ActualDate      sql.NullTime   `json:"actual_date"`
+	Status          sql.NullString `json:"status"`
+	ReminderCount   sql.NullInt32  `json:"reminder_count"`
+	ReminderDate    sql.NullTime   `json:"reminder_date"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
+// Automated reminder system for pledge payments
+type PledgeReminder struct {
+	ID                uuid.UUID      `json:"id"`
+	PledgeID          uuid.UUID      `json:"pledge_id"`
+	PledgePaymentID   uuid.NullUUID  `json:"pledge_payment_id"`
+	ReminderType      string         `json:"reminder_type"`
+	ScheduledDate     time.Time      `json:"scheduled_date"`
+	SentDate          sql.NullTime   `json:"sent_date"`
+	Status            sql.NullString `json:"status"`
+	MessageTemplateID uuid.NullUUID  `json:"message_template_id"`
+	CreatedAt         sql.NullTime   `json:"created_at"`
+	UpdatedAt         sql.NullTime   `json:"updated_at"`
 }
 
 type PriceField struct {
@@ -1020,6 +1329,22 @@ type Setting struct {
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
 }
 
+// Individual SMS messages
+type SmsMessage struct {
+	ID                uuid.UUID      `json:"id"`
+	ContactID         uuid.UUID      `json:"contact_id"`
+	PhoneNumber       string         `json:"phone_number"`
+	Message           string         `json:"message"`
+	Direction         sql.NullString `json:"direction"`
+	Status            sql.NullString `json:"status"`
+	Provider          sql.NullString `json:"provider"`
+	ProviderMessageID sql.NullString `json:"provider_message_id"`
+	SentAt            sql.NullTime   `json:"sent_at"`
+	DeliveredAt       sql.NullTime   `json:"delivered_at"`
+	CreatedAt         sql.NullTime   `json:"created_at"`
+	UpdatedAt         sql.NullTime   `json:"updated_at"`
+}
+
 type StateProvince struct {
 	ID           uuid.UUID      `json:"id"`
 	Name         string         `json:"name"`
@@ -1161,7 +1486,7 @@ type UfJoin struct {
 	ID          uuid.UUID     `json:"id"`
 	UfGroupID   uuid.UUID     `json:"uf_group_id"`
 	EntityTable string        `json:"entity_table"`
-	EntityID    uuid.NullUUID `json:"entity_id"`
+	EntityID    uuid.UUID     `json:"entity_id"`
 	Weight      sql.NullInt32 `json:"weight"`
 	IsActive    sql.NullBool  `json:"is_active"`
 	CreatedAt   sql.NullTime  `json:"created_at"`
