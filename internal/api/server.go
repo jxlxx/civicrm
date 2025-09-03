@@ -56,8 +56,10 @@ func New(config *config.APIConfig, logger *logger.Logger, db *database.Database,
 		extensions: extensions,
 	}
 
-	// Create the HTTP handler using generated code
-	server.handler = Handler(server)
+	// Create the HTTP handler using generated code with correct base URL
+	server.handler = HandlerWithOptions(server, StdHTTPServerOptions{
+		BaseURL: "/api/v4",
+	})
 
 	// Add middleware
 	server.handler = server.addMiddleware(server.handler)
@@ -185,6 +187,28 @@ func (s *Server) ApiInfo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(info); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
+}
+
+// OpenAPISpec returns the OpenAPI specification as JSON
+func (s *Server) OpenAPISpec(w http.ResponseWriter, r *http.Request) {
+	// Get the embedded OpenAPI specification
+	spec, err := GetSwagger()
+	if err != nil {
+		s.logger.Error("Failed to get OpenAPI spec", "error", err)
+		http.Error(w, "Failed to load OpenAPI specification", http.StatusInternalServerError)
+		return
+	}
+
+	// Set appropriate headers
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+
+	// Encode and send the specification as JSON
+	if err := json.NewEncoder(w).Encode(spec); err != nil {
+		s.logger.Error("Failed to encode OpenAPI spec", "error", err)
+		http.Error(w, "Failed to encode OpenAPI specification", http.StatusInternalServerError)
 		return
 	}
 }
@@ -340,6 +364,8 @@ func (s *Server) ServeStatic(w http.ResponseWriter, r *http.Request, path string
 		w.Header().Set("Content-Type", "application/json")
 	case ".xml":
 		w.Header().Set("Content-Type", "application/xml")
+	case ".yaml", ".yml":
+		w.Header().Set("Content-Type", "application/x-yaml")
 	default:
 		w.Header().Set("Content-Type", "application/octet-stream")
 	}

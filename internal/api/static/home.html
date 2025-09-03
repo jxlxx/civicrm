@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CiviCRM Go Implementation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+        }
+        .status {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+            margin: 20px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        .feature-card h4 {
+            margin-top: 0;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏛️ CiviCRM Go Implementation</h1>
+        
+        <div class="info">
+            <h3>🚀 Modern CiviCRM Rewrite in Go</h3>
+            <p>This is a complete rewrite of CiviCRM in Go, featuring a modern REST API, embedded static file serving, and cloud-native architecture.</p>
+        </div>
+
+        <div class="status">
+            <h3>✅ Current Implementation Status</h3>
+            <ul>
+                <li><strong>API Server:</strong> REST API v4 with OpenAPI 3.0 specification</li>
+                <li><strong>Database:</strong> PostgreSQL with comprehensive migration system</li>
+                <li><strong>Static Assets:</strong> Embedded file system for documentation and assets</li>
+                <li><strong>Security:</strong> JWT authentication, CORS, security headers</li>
+                <li><strong>Development:</strong> Docker Compose setup with PostgreSQL, Redis, pgAdmin</li>
+            </ul>
+        </div>
+
+        <h2>🏗️ Architecture Overview</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>📡 REST API v4</h4>
+                <p>Modern RESTful API with OpenAPI specification, supporting CRUD operations for all CiviCRM entities.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🗄️ Database Layer</h4>
+                <p>PostgreSQL with sqlc for type-safe SQL generation and comprehensive migration system using Tern.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔒 Security</h4>
+                <p>JWT authentication, CORS support, security headers, and path traversal protection.</p>
+            </div>
+            <div class="feature-card">
+                <h4>📁 Static Assets</h4>
+                <p>Embedded file system serving documentation, OpenAPI specs, and frontend assets.</p>
+            </div>
+        </div>
+
+        <h2>🔧 Development Features</h2>
+        <ul>
+            <li>✅ <strong>Docker Compose:</strong> Complete development environment with PostgreSQL, Redis, pgAdmin</li>
+            <li>✅ <strong>Code Generation:</strong> OpenAPI to Go code generation with oapi-codegen</li>
+            <li>✅ <strong>Migrations:</strong> Database schema management with Tern</li>
+            <li>✅ <strong>Static Serving:</strong> Embedded file system with automatic content-type detection</li>
+            <li>✅ <strong>Middleware:</strong> Logging, CORS, security, and authentication middleware</li>
+        </ul>
+
+        <div class="warning">
+            <h3>⚠️ Development Status</h3>
+            <p><strong>This is an active development project.</strong> The core infrastructure is implemented, but entity-specific business logic is still being developed. The API endpoints return placeholder responses while the full CiviCRM functionality is being ported from PHP.</p>
+        </div>
+
+        <h2>📚 Available Resources</h2>
+        <ul>
+            <li><strong>API Documentation:</strong> <a href="/static/docs.html">Interactive API Docs</a></li>
+            <li><strong>OpenAPI Spec (YAML):</strong> <a href="/static/openapi.yaml">OpenAPI 3.0 Specification</a></li>
+            <li><strong>OpenAPI Spec (JSON):</strong> <a href="/api/v4/openapi.json">OpenAPI 3.0 as JSON</a></li>
+            <li><strong>Health Check:</strong> <a href="/api/v4/health">API Health Status</a></li>
+            <li><strong>API Info:</strong> <a href="/api/v4/">API Information</a></li>
+        </ul>
+
+        <h2>🚀 Quick Start</h2>
+        <p>To get started with development:</p>
+        <ol>
+            <li>Run <code>make up</code> to start development services</li>
+            <li>Run <code>make migrate</code> to set up the database</li>
+            <li>Run <code>make run</code> to start the API server</li>
+            <li>Visit <code>http://localhost:8080/static/home.html</code> for this page</li>
+        </ol>
+    </div>
+</body>
+</html>

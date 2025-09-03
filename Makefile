@@ -52,7 +52,11 @@ generate-api:
 		exit 1; \
 	fi
 	oapi-codegen --config api/oapi-codegen-config.yaml api/openapi.yaml
+	@echo "Copying OpenAPI spec to static directory..."
+	@mkdir -p internal/api/static
+	@cp api/openapi.yaml internal/api/static/openapi.yaml
 	@echo "API code generation complete: internal/api/generated.go"
+	@echo "OpenAPI spec copied to: internal/api/static/openapi.yaml"
 
 # Start development services
 up:
@@ -242,7 +246,8 @@ build-docs:
 	@echo "Building API documentation..."
 	@mkdir -p internal/api/static
 	@cp api/docs.html internal/api/static/docs.html
-	@echo "Documentation built to internal/api/static/docs.html"
+	@cp api/openapi.yaml internal/api/static/openapi.yaml
+	@echo "Documentation built to internal/api/static/"
 
 # Serve API documentation with Redocly
 docs:
