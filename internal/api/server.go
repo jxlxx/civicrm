@@ -38,13 +38,8 @@ func New(config *config.APIConfig, logger *logger.Logger, db *database.Database,
 		extensions: extensions,
 	}
 
-	// Create the server implementation
-	impl := &ServerImpl{
-		server: server,
-	}
-
 	// Create the HTTP handler using generated code
-	server.handler = Handler(impl)
+	server.handler = Handler(server)
 
 	// Add middleware
 	server.handler = server.addMiddleware(server.handler)
@@ -160,13 +155,8 @@ func (rw *responseWriter) WriteHeader(code int) {
 	rw.ResponseWriter.WriteHeader(code)
 }
 
-// ServerImpl implements the generated ServerInterface
-type ServerImpl struct {
-	server *Server
-}
-
 // ApiInfo returns API information
-func (s *ServerImpl) ApiInfo(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ApiInfo(w http.ResponseWriter, r *http.Request) {
 	info := APIInfo{
 		Version:     ptr("4.0.0"),
 		Name:        ptr("CiviCRM API v4"),
@@ -182,7 +172,7 @@ func (s *ServerImpl) ApiInfo(w http.ResponseWriter, r *http.Request) {
 }
 
 // ListExtensions returns list of loaded extensions
-func (s *ServerImpl) ListExtensions(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ListExtensions(w http.ResponseWriter, r *http.Request) {
 	// For now, return empty list - will be implemented when extensions are loaded
 	extensions := []Extension{}
 
@@ -194,9 +184,9 @@ func (s *ServerImpl) ListExtensions(w http.ResponseWriter, r *http.Request) {
 }
 
 // HealthCheck returns health status
-func (s *ServerImpl) HealthCheck(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	status := "healthy"
-	if s.server.db == nil {
+	if s.db == nil {
 		status = "unhealthy"
 	}
 
@@ -215,7 +205,7 @@ func (s *ServerImpl) HealthCheck(w http.ResponseWriter, r *http.Request) {
 }
 
 // EntityDelete handles entity deletion
-func (s *ServerImpl) EntityDelete(w http.ResponseWriter, r *http.Request, entity string, action string, params EntityDeleteParams) {
+func (s *Server) EntityDelete(w http.ResponseWriter, r *http.Request, entity string, action string, params EntityDeleteParams) {
 	// TODO: Implement entity deletion logic
 	response := APIResponse{
 		IsError: ptr(false),
@@ -232,7 +222,7 @@ func (s *ServerImpl) EntityDelete(w http.ResponseWriter, r *http.Request, entity
 }
 
 // EntityGet handles entity retrieval
-func (s *ServerImpl) EntityGet(w http.ResponseWriter, r *http.Request, entity string, action string, params EntityGetParams) {
+func (s *Server) EntityGet(w http.ResponseWriter, r *http.Request, entity string, action string, params EntityGetParams) {
 	// TODO: Implement entity retrieval logic
 	response := APIResponse{
 		IsError: ptr(false),
@@ -249,7 +239,7 @@ func (s *ServerImpl) EntityGet(w http.ResponseWriter, r *http.Request, entity st
 }
 
 // EntityCreate handles entity creation
-func (s *ServerImpl) EntityCreate(w http.ResponseWriter, r *http.Request, entity string, action string) {
+func (s *Server) EntityCreate(w http.ResponseWriter, r *http.Request, entity string, action string) {
 	// TODO: Implement entity creation logic
 	response := APIResponse{
 		IsError: ptr(false),
@@ -266,7 +256,7 @@ func (s *ServerImpl) EntityCreate(w http.ResponseWriter, r *http.Request, entity
 }
 
 // EntityUpdate handles entity updates
-func (s *ServerImpl) EntityUpdate(w http.ResponseWriter, r *http.Request, entity string, action string, params EntityUpdateParams) {
+func (s *Server) EntityUpdate(w http.ResponseWriter, r *http.Request, entity string, action string, params EntityUpdateParams) {
 	// TODO: Implement entity update logic
 	response := APIResponse{
 		IsError: ptr(false),

@@ -84,4 +84,4 @@ extensions/*/
 
 # Generated API documentation
 internal/api/generated.go
-api/docs.html
+internal/api/static/docs.html

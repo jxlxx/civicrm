@@ -1,6 +1,6 @@
 # CiviCRM Go Makefile
 
-.PHONY: help build run test clean deps lint format migrate migrate-new migrate-rollback migrate-status install-tern up down logs generate-api
+.PHONY: help build run test clean deps lint format migrate migrate-new migrate-rollback migrate-status install-tern up down logs generate-api build-docs docs install-redocly
 
 # Default target
 help:
@@ -27,6 +27,7 @@ help:
 	@echo "  generate-api - Generate Go code from OpenAPI spec"
 	@echo "  install-oapi - Install oapi-codegen tool"
 	@echo "  watch-api   - Watch OpenAPI spec and regenerate code"
+	@echo "  build-docs  - Build API documentation to internal/api/static/"
 	@echo "  docs        - Serve API documentation with Redocly"
 	@echo "  docs-python - Serve API documentation with Python (fallback)"
 	@echo "  install-redocly - Install Redocly CLI tool"
@@ -179,6 +180,8 @@ deps:
 	go mod tidy
 	@echo "Generating API code..."
 	@$(MAKE) generate-api
+	@echo "Building documentation..."
+	@$(MAKE) build-docs
 
 # Run linter
 lint:
@@ -233,6 +236,13 @@ install-redocly:
 	@echo "Installing Redocly CLI tool..."
 	npm install -g @redocly/cli
 	@echo "Redocly CLI installation complete"
+
+# Build API documentation
+build-docs:
+	@echo "Building API documentation..."
+	@mkdir -p internal/api/static
+	@cp api/docs.html internal/api/static/docs.html
+	@echo "Documentation built to internal/api/static/docs.html"
 
 # Serve API documentation with Redocly
 docs:
