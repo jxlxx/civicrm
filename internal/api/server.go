@@ -2,9 +2,13 @@ package api
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"net/http"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/jxlxx/civicrm/internal/cache"
@@ -14,6 +18,20 @@ import (
 	"github.com/jxlxx/civicrm/internal/logger"
 	"github.com/jxlxx/civicrm/internal/security"
 )
+
+//go:embed static/*
+var staticFiles embed.FS
+
+// getStaticFS returns the embedded file system for static assets
+func getStaticFS() http.FileSystem {
+	// Create a sub-filesystem for the static directory
+	staticFS, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		// If there's an error, return an empty filesystem
+		return http.FS(staticFiles)
+	}
+	return http.FS(staticFS)
+}
 
 // Server represents the API server using standard library HTTP
 type Server struct {
@@ -270,6 +288,67 @@ func (s *Server) EntityUpdate(w http.ResponseWriter, r *http.Request, entity str
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
+}
+
+// ServeStatic handles serving static files from the embedded file system
+func (s *Server) ServeStatic(w http.ResponseWriter, r *http.Request, path string) {
+	// Clean the path to prevent directory traversal
+	path = filepath.Clean(path)
+	if strings.Contains(path, "..") {
+		http.Error(w, "Invalid path", http.StatusBadRequest)
+		return
+	}
+
+	// Get the embedded file system
+	staticFS := getStaticFS()
+
+	// Try to open the file
+	file, err := staticFS.Open(path)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+	defer file.Close()
+
+	// Get file info to determine content type
+	info, err := file.Stat()
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Set appropriate content type based on file extension
+	ext := strings.ToLower(filepath.Ext(path))
+	switch ext {
+	case ".html":
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	case ".css":
+		w.Header().Set("Content-Type", "text/css; charset=utf-8")
+	case ".js":
+		w.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+	case ".png":
+		w.Header().Set("Content-Type", "image/png")
+	case ".jpg", ".jpeg":
+		w.Header().Set("Content-Type", "image/jpeg")
+	case ".gif":
+		w.Header().Set("Content-Type", "image/gif")
+	case ".svg":
+		w.Header().Set("Content-Type", "image/svg+xml")
+	case ".ico":
+		w.Header().Set("Content-Type", "image/x-icon")
+	case ".json":
+		w.Header().Set("Content-Type", "application/json")
+	case ".xml":
+		w.Header().Set("Content-Type", "application/xml")
+	default:
+		w.Header().Set("Content-Type", "application/octet-stream")
+	}
+
+	// Set cache headers for static assets
+	w.Header().Set("Cache-Control", "public, max-age=3600")
+
+	// Serve the file
+	http.ServeContent(w, r, info.Name(), info.ModTime(), file)
 }
 
 // Helper function for creating pointers to any type
